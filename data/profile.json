@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "profile": {
+    "name": "Rizky Ibato",
+    "username": "ribato",
+    "bio": "Full-Stack Engineer • Open Source Enthusiast ✨",
+    "avatar": "",
+    "location": "Batam, Indonesia"
+  },
+  "links": [
+    {
+      "id": "lnk_portfolio",
+      "title": "My Portfolio",
+      "url": "https://ribato.dev",
+      "icon": "globe",
+      "enabled": true,
+      "order": 0,
+      "target": "_blank"
+    },
+    {
+      "id": "lnk_github",
+      "title": "GitHub",
+      "url": "https://github.com/ribato",
+      "icon": "github",
+      "enabled": true,
+      "order": 1,
+      "target": "_blank"
+    },
+    {
+      "id": "lnk_linkedin",
+      "title": "LinkedIn",
+      "url": "https://linkedin.com/in/ribato",
+      "icon": "linkedin",
+      "enabled": true,
+      "order": 2,
+      "target": "_blank"
+    },
+    {
+      "id": "lnk_twitter",
+      "title": "Twitter / X",
+      "url": "https://x.com/ribato",
+      "icon": "twitter",
+      "enabled": true,
+      "order": 3,
+      "target": "_blank"
+    }
+  ],
+  "theme": {
+    "preset": "midnight",
+    "mode": "dark",
+    "colors": {
+      "background": "#0c0a1a",
+      "cardBackground": "#15132b",
+      "text": "#e2e8f0",
+      "accent": "#a78bfa",
+      "linkHover": "#c4b5fd"
+    },
+    "font": "Inter",
+    "buttonStyle": "rounded",
+    "animation": "fade-up"
+  },
+  "seo": {
+    "title": "Rizky Ibato — Links",
+    "description": "All my important links in one place.",
+    "ogImage": "",
+    "favicon": ""
+  },
+  "settings": {
+    "showFooter": true,
+    "footerText": "Powered by VoltBio",
+    "analyticsId": "",
+    "locale": "en"
+  }
+}
