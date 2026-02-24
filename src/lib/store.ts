@@ -74,6 +74,7 @@ interface VoltBioStore {
   addDonation: () => void;
   addPortfolio: () => void;
   addLeadForm: () => void;
+  addCountdown: () => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -261,6 +262,32 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, form],
+            },
+          };
+        }),
+
+      addCountdown: () =>
+        set((state) => {
+          // Default target: 7 days from now
+          const target = new Date();
+          target.setDate(target.getDate() + 7);
+          const countdown: LinkItem = {
+            id: nanoid(10),
+            title: "⏰ Coming Soon!",
+            url: "",
+            icon: "clock",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_self",
+            type: "countdown",
+            targetDate: target.toISOString(),
+            timerLabel: "Promo Berakhir Dalam:",
+            timerStyle: "card",
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, countdown],
             },
           };
         }),

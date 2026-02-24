@@ -147,6 +147,62 @@ function generateHtml(config: ProfileConfig): string {
       ${lightboxHtml}`;
       }
 
+      // Countdown Timer Block
+      if (link.type === "countdown") {
+        const targetISO = link.targetDate || new Date().toISOString();
+        const style = link.timerStyle || "card";
+        const label = escapeHtml(link.timerLabel || "Countdown");
+        const title = escapeHtml(link.title || "");
+        const timerId = `timer-${link.id}`;
+
+        const digitBoxCss = style === "card"
+          ? `background:${theme.colors.accent}15;border-radius:0.75rem;padding:0.75rem 0.5rem;min-width:3.5rem;border:1.5px solid ${theme.colors.accent}25;text-align:center`
+          : style === "flip"
+          ? `background:${theme.colors.accent};border-radius:0.5rem;padding:0.75rem 0.5rem;min-width:3.5rem;text-align:center`
+          : `padding:0.5rem;text-align:center`;
+
+        const digitColor = style === "flip" ? "#fff" : theme.colors.accent;
+        const labelColor = style === "flip" ? "#fff" : theme.colors.text;
+
+        const bgGrad = style === "flip"
+          ? `linear-gradient(135deg,${theme.colors.accent}20,${theme.colors.accent}08)`
+          : `linear-gradient(135deg,${theme.colors.accent}10,transparent)`;
+
+        return `
+      <div style="width:100%">
+        <div style="position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem;text-align:center;background:${bgGrad};border:1.5px solid ${theme.colors.accent}25">
+          <p style="font-size:0.75rem;font-weight:600;margin-bottom:0.75rem;opacity:0.7;color:${theme.colors.text}">${label}</p>
+          ${title ? `<p style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:${theme.colors.text}">${title}</p>` : ""}
+          <div id="${timerId}" style="display:flex;justify-content:center;gap:0.5rem">
+            ${["Days", "Hours", "Min", "Sec"].map((u) => `
+            <div style="${digitBoxCss}">
+              <p class="cd-val" style="font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;color:${digitColor};margin:0">00</p>
+              <p style="font-size:0.5625rem;font-weight:500;text-transform:uppercase;margin-top:0.125rem;opacity:0.6;color:${labelColor};margin:0">${u}</p>
+            </div>`).join("")}
+          </div>
+        </div>
+      </div>
+      <script>
+      (function(){
+        var target = new Date("${targetISO}").getTime();
+        var el = document.getElementById("${timerId}");
+        if(!el) return;
+        var vals = el.querySelectorAll(".cd-val");
+        function tick(){
+          var diff = target - Date.now();
+          if(diff<=0){ vals[0].textContent="🎉"; vals[1].textContent=""; vals[2].textContent=""; vals[3].textContent="Time's Up!"; return; }
+          var d=Math.floor(diff/864e5), h=Math.floor(diff/36e5%24), m=Math.floor(diff/6e4%60), s=Math.floor(diff/1e3%60);
+          vals[0].textContent=String(d).padStart(2,"0");
+          vals[1].textContent=String(h).padStart(2,"0");
+          vals[2].textContent=String(m).padStart(2,"0");
+          vals[3].textContent=String(s).padStart(2,"0");
+        }
+        tick();
+        setInterval(tick,1000);
+      })();
+      </script>`;
+      }
+
       // Lead Form / Contact Form Block
       if (link.type === "lead-form") {
         const fields = link.formFields || ["name", "email", "message"];

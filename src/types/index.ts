@@ -42,8 +42,8 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
-  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid, 'lead-form' = contact form */
-  type?: "link" | "header" | "action" | "donation" | "portfolio" | "lead-form";
+  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid, 'lead-form' = contact form, 'countdown' = countdown timer */
+  type?: "link" | "header" | "action" | "donation" | "portfolio" | "lead-form" | "countdown";
   isEmbed?: boolean;
   /** Display as inline PDF viewer */
   isPdfEmbed?: boolean;
@@ -69,6 +69,10 @@ export interface LinkItem {
   formFields?: ("name" | "email" | "phone" | "message")[];
   formCta?: string;          // Submit button text
   formSuccessMsg?: string;   // Thank-you message after submit
+  /** Countdown Timer fields */
+  targetDate?: string;       // ISO date string for countdown target
+  timerLabel?: string;       // Label text, e.g. "Promo Berakhir Dalam:"
+  timerStyle?: "minimal" | "card" | "flip";  // Visual style
 }
 
 /** A single image in a portfolio grid block */

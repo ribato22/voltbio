@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MapPin, Sparkles, UserPlus, Lock, MessageCircle, ChevronDown } from "lucide-react";
-import { useState as useReactState, useSyncExternalStore } from "react";
+import { useState as useReactState, useEffect, useSyncExternalStore } from "react";
 import { useStore } from "@/lib/store";
 import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
@@ -511,6 +511,109 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
               );
             }
 
+            // ── Countdown Timer Block ──
+            if (link.type === "countdown") {
+              const targetDate = link.targetDate || new Date().toISOString();
+              const style = link.timerStyle || "card";
+
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const [timeLeft, setTimeLeft] = useReactState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
+
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              useEffect(() => {
+                const update = () => {
+                  const now = Date.now();
+                  const target = new Date(targetDate).getTime();
+                  const diff = target - now;
+                  if (diff <= 0) {
+                    setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true });
+                    return;
+                  }
+                  setTimeLeft({
+                    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+                    minutes: Math.floor((diff / (1000 * 60)) % 60),
+                    seconds: Math.floor((diff / 1000) % 60),
+                    expired: false,
+                  });
+                };
+                update();
+                const interval = setInterval(update, 1000);
+                return () => clearInterval(interval);
+              }, [targetDate]);
+
+              const units = [
+                { label: "Days", value: timeLeft.days },
+                { label: "Hours", value: timeLeft.hours },
+                { label: "Min", value: timeLeft.minutes },
+                { label: "Sec", value: timeLeft.seconds },
+              ];
+
+              const digitBoxStyle: React.CSSProperties = style === "card"
+                ? { background: `${theme.colors.accent}15`, borderRadius: "0.75rem", padding: "0.75rem 0.5rem", minWidth: "3.5rem", border: `1.5px solid ${theme.colors.accent}25` }
+                : style === "flip"
+                ? { background: `${theme.colors.accent}`, borderRadius: "0.5rem", padding: "0.75rem 0.5rem", minWidth: "3.5rem", color: "#fff" }
+                : { padding: "0.5rem" };
+
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="countdown-block w-full"
+                >
+                  <div
+                    className="relative overflow-hidden rounded-2xl p-5 text-center"
+                    style={{
+                      background: style === "flip"
+                        ? `linear-gradient(135deg, ${theme.colors.accent}20, ${theme.colors.accent}08)`
+                        : `linear-gradient(135deg, ${theme.colors.accent}10, transparent)`,
+                      border: `1.5px solid ${theme.colors.accent}25`,
+                    }}
+                  >
+                    {/* Label */}
+                    <p className="text-xs font-semibold mb-3 opacity-70" style={{ color: theme.colors.text }}>
+                      {link.timerLabel || "Countdown"}
+                    </p>
+
+                    {/* Title */}
+                    {link.title && (
+                      <p className="text-base font-bold mb-4" style={{ color: theme.colors.text }}>
+                        {link.title}
+                      </p>
+                    )}
+
+                    {/* Timer digits */}
+                    {timeLeft.expired ? (
+                      <div className="py-4">
+                        <p className="text-lg font-bold" style={{ color: theme.colors.accent }}>
+                          🎉 Time&apos;s Up!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex justify-center gap-2">
+                        {units.map((u) => (
+                          <div key={u.label} className="text-center" style={digitBoxStyle}>
+                            <p
+                              className="text-2xl font-bold tabular-nums"
+                              style={{ color: style === "flip" ? "#fff" : theme.colors.accent }}
+                            >
+                              {String(u.value).padStart(2, "0")}
+                            </p>
+                            <p
+                              className="text-[9px] font-medium uppercase mt-0.5 opacity-60"
+                              style={{ color: style === "flip" ? "#fff" : theme.colors.text }}
+                            >
+                              {u.label}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            }
+
             // ── Lead Form / Contact Form Block ──
             if (link.type === "lead-form") {
               const fields = link.formFields || ["name", "email", "message"];
@@ -561,14 +664,8 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                     <form
                       action={actionUrl}
                       method="POST"
+                      target="_blank"
                       className="space-y-3"
-                      onSubmit={(e) => {
-                        // In preview (embedded mode), prevent actual submission
-                        if (embedded) {
-                          e.preventDefault();
-                          alert(link.formSuccessMsg || "Thank you! Your message has been sent.");
-                        }
-                      }}
                     >
                       {/* Hidden fields */}
                       {provider === "formsubmit" && (

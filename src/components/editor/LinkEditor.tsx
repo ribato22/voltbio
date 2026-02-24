@@ -48,6 +48,7 @@ import {
   Upload,
   Image,
   Mail,
+  Timer,
 } from "lucide-react";
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
@@ -819,6 +820,64 @@ function SortableLinkItem({
                   ? "⚡ FormSubmit.co — Free, no signup. First email must confirm activation."
                   : "⚡ Web3Forms — Free 250 submissions/month. Get key at web3forms.com"}
               </p>
+              <p className="text-[9px] text-amber-500 font-medium mt-1">
+                📌 Note: FormSubmit.co requires a one-time activation. Submit a test form from the Live Preview to activate your email.
+              </p>
+            </div>
+          )}
+
+          {/* ── Countdown Timer Config ── */}
+          {link.type === "countdown" && (
+            <div className="space-y-3 p-3 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+              <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+                <Timer className="w-3.5 h-3.5" />
+                Countdown Timer Settings
+              </p>
+
+              {/* Target date/time */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Target Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={link.targetDate ? new Date(link.targetDate).toISOString().slice(0, 16) : ""}
+                  onChange={(e) => onUpdate(link.id, { targetDate: new Date(e.target.value).toISOString() })}
+                  className="w-full px-3 py-2 rounded-lg text-sm border border-[var(--lf-border)] bg-[var(--lf-card-bg)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+                />
+              </div>
+
+              {/* Timer label */}
+              <Input
+                label="Timer Label"
+                value={link.timerLabel || ""}
+                onChange={(e) => onUpdate(link.id, { timerLabel: e.target.value })}
+                placeholder="Promo Berakhir Dalam:"
+              />
+
+              {/* Style selector */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Timer Style
+                </label>
+                <div className="flex gap-1.5">
+                  {(["minimal", "card", "flip"] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => onUpdate(link.id, { timerStyle: s })}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border capitalize",
+                        (link.timerStyle || "card") === s
+                          ? "bg-[var(--lf-accent)] text-white border-transparent"
+                          : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                      )}
+                    >
+                      {s === "flip" ? "🎰 Flip" : s === "card" ? "🎨 Card" : "✨ Minimal"}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -829,7 +888,7 @@ function SortableLinkItem({
             className="w-full"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : link.type === "lead-form" ? "Delete Form" : "Delete Link"}
+            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : link.type === "lead-form" ? "Delete Form" : link.type === "countdown" ? "Delete Timer" : "Delete Link"}
           </Button>
         </div>
       )}
@@ -849,6 +908,7 @@ export function LinkEditor() {
   const addDonation = useStore((s) => s.addDonation);
   const addPortfolio = useStore((s) => s.addPortfolio);
   const addLeadForm = useStore((s) => s.addLeadForm);
+  const addCountdown = useStore((s) => s.addCountdown);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -881,7 +941,7 @@ export function LinkEditor() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Link2 className="w-4 h-4 text-[var(--lf-accent)]" />
           <h3 className="text-sm font-semibold text-[var(--lf-text)]">Links</h3>
@@ -889,7 +949,7 @@ export function LinkEditor() {
             ({links.length})
           </span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-1.5">
           <Button size="sm" variant="secondary" onClick={() => addSection()}>
             <FolderOpen className="w-3.5 h-3.5" />
             Section
@@ -909,6 +969,10 @@ export function LinkEditor() {
           <Button size="sm" variant="secondary" onClick={() => addLeadForm()}>
             <Mail className="w-3.5 h-3.5" />
             Lead Form
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => addCountdown()}>
+            <Timer className="w-3.5 h-3.5" />
+            Countdown
           </Button>
           <Button size="sm" onClick={() => addLink()}>
             <Plus className="w-3.5 h-3.5" />
