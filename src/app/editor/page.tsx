@@ -12,6 +12,7 @@ import { ThemeEditor } from "@/components/editor/ThemeEditor";
 import { SeoEditor } from "@/components/editor/SeoEditor";
 import { QRCodeGenerator } from "@/components/editor/QRCodeGenerator";
 import { AnalyticsDashboard } from "@/components/editor/AnalyticsDashboard";
+import { TestimonialsEditor } from "@/components/editor/TestimonialsEditor";
 import { BioPage } from "@/components/preview/BioPage";
 import { Tabs, TabContent } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
@@ -28,6 +29,7 @@ import {
   EyeOff,
   Sparkles,
   Smartphone,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EditorPanel } from "@/types";
@@ -40,6 +42,7 @@ function useHasMounted() {
 const tabItems = [
   { value: "profile" as const, label: "Profile", icon: <User className="w-3.5 h-3.5" /> },
   { value: "links" as const, label: "Links", icon: <Link2 className="w-3.5 h-3.5" /> },
+  { value: "testimonials" as const, label: "Reviews", icon: <Star className="w-3.5 h-3.5" /> },
   { value: "theme" as const, label: "Theme", icon: <Palette className="w-3.5 h-3.5" /> },
   { value: "seo" as const, label: "SEO", icon: <Search className="w-3.5 h-3.5" /> },
 ];
@@ -172,6 +175,9 @@ export default function EditorPage() {
                 <div className="mt-6 pt-6 border-t border-[var(--lf-border)]">
                   <AnalyticsDashboard />
                 </div>
+              </TabContent>
+              <TabContent value="testimonials">
+                <TestimonialsEditor />
               </TabContent>
               <TabContent value="theme">
                 <ThemeEditor />

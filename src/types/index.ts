@@ -2,6 +2,14 @@
    VoltBio — Core Type Definitions
    ============================================================ */
 
+/** Testimonial / Review card */
+export interface Testimonial {
+  id: string;
+  name: string;
+  text: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+}
+
 /** Field definition for Smart Action Buttons */
 export interface ActionField {
   id: string;
@@ -95,6 +103,7 @@ export interface ProfileConfig {
   version: string;
   profile: Profile;
   links: LinkItem[];
+  testimonials?: Testimonial[];
   theme: ThemeConfig;
   seo: SeoConfig;
   settings: AppSettings;
@@ -111,4 +120,4 @@ export interface ThemePreset {
 }
 
 /** Editor active panel */
-export type EditorPanel = "profile" | "links" | "theme" | "seo" | "settings";
+export type EditorPanel = "profile" | "links" | "theme" | "seo" | "settings" | "testimonials";

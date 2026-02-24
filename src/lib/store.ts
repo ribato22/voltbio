@@ -7,7 +7,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
-import type { ProfileConfig, LinkItem, ThemeConfig, Profile, SeoConfig, AppSettings, EditorPanel } from "@/types";
+import type { ProfileConfig, LinkItem, ThemeConfig, Profile, SeoConfig, AppSettings, EditorPanel, Testimonial } from "@/types";
 import { themePresets } from "@/lib/themes";
 
 const defaultConfig: ProfileConfig = {
@@ -83,6 +83,11 @@ interface VoltBioStore {
 
   // Settings actions
   updateSettings: (settings: Partial<AppSettings>) => void;
+
+  // Testimonial actions
+  addTestimonial: () => void;
+  updateTestimonial: (id: string, updates: Partial<Testimonial>) => void;
+  removeTestimonial: (id: string) => void;
 
   // Editor UI actions
   setActivePanel: (panel: EditorPanel) => void;
@@ -259,6 +264,38 @@ export const useStore = create<VoltBioStore>()(
           config: {
             ...state.config,
             settings: { ...state.config.settings, ...settings },
+          },
+        })),
+
+      // ── Testimonials ──
+      addTestimonial: () =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            testimonials: [
+              ...(state.config.testimonials || []),
+              { id: nanoid(8), name: "", text: "", rating: 5 as const },
+            ],
+          },
+        })),
+
+      updateTestimonial: (id, updates) =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            testimonials: (state.config.testimonials || []).map((t) =>
+              t.id === id ? { ...t, ...updates } : t
+            ),
+          },
+        })),
+
+      removeTestimonial: (id) =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            testimonials: (state.config.testimonials || []).filter(
+              (t) => t.id !== id
+            ),
           },
         })),
 

@@ -233,6 +233,23 @@ function generateHtml(config: ProfileConfig): string {
     ? `<footer class="footer">${escapeHtml(settings.footerText)}</footer>`
     : "";
 
+  // ── Testimonials Carousel HTML ──
+  const validTestimonials = (config.testimonials || []).filter((t) => t.name && t.text);
+  const testimonialsHtml = validTestimonials.length > 0
+    ? `<div class="testimonials-section">
+        <p class="testimonials-title">★ Reviews</p>
+        <div class="testimonials-track">
+          ${validTestimonials.map((t) => `
+            <div class="testimonial-card" style="background:${theme.colors.cardBackground};border:1px solid ${theme.colors.cardBackground}">
+              <div class="testimonial-stars">${[1,2,3,4,5].map((n) => `<svg width="14" height="14" viewBox="0 0 24 24" fill="${n <= t.rating ? '#facc15' : 'none'}" stroke="${n <= t.rating ? '#facc15' : 'currentColor'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`).join("")}</div>
+              <p class="testimonial-text">&ldquo;${escapeHtml(t.text)}&rdquo;</p>
+              <p class="testimonial-name">&mdash; ${escapeHtml(t.name)}</p>
+            </div>
+          `).join("")}
+        </div>
+      </div>`
+    : "";
+
   // ── Analytics snippet ──
   const analyticsHtml = settings.analyticsId
     ? `<script defer src="https://cloud.umami.is/script.js" data-website-id="${escapeHtml(settings.analyticsId)}"></script>`
@@ -398,6 +415,15 @@ function generateHtml(config: ProfileConfig): string {
       font-size: 0.75rem;
       opacity: 0.4;
     }
+
+    .testimonials-section { width: 100%; margin-top: 1.5rem; }
+    .testimonials-title { font-size: 0.75rem; font-weight: 600; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; color: ${theme.colors.text}; }
+    .testimonials-track { display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; scroll-snap-type: x mandatory; -ms-overflow-style: none; scrollbar-width: none; }
+    .testimonials-track::-webkit-scrollbar { display: none; }
+    .testimonial-card { flex-shrink: 0; width: 240px; padding: 1rem; border-radius: 0.75rem; scroll-snap-align: start; }
+    .testimonial-stars { display: flex; gap: 2px; margin-bottom: 0.5rem; }
+    .testimonial-text { font-size: 0.75rem; line-height: 1.7; opacity: 0.8; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; color: ${theme.colors.text}; }
+    .testimonial-name { font-size: 0.6875rem; font-weight: 600; margin-top: 0.5rem; opacity: 0.6; color: ${theme.colors.text}; }
   </style>
   ${settings.customCSS ? `<style>/* Custom CSS */\n${settings.customCSS}</style>` : ""}
 </head>
@@ -411,6 +437,7 @@ function generateHtml(config: ProfileConfig): string {
     <div class="links">
       ${linksHtml}
     </div>
+    ${testimonialsHtml}
     ${footerHtml}
   </main>
   ${vcardScript}

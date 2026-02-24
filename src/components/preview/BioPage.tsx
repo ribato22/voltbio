@@ -169,7 +169,7 @@ const linkCardVariants = {
  * - whileTap press-down feedback
  */
 export function BioPage({ embedded = false }: { embedded?: boolean }) {
-  const { profile, links, theme, settings } = useStore((s) => s.config);
+  const { profile, links, testimonials, theme, settings } = useStore((s) => s.config);
 
   const enabledLinks = links
     .filter((l) => l.enabled)
@@ -490,6 +490,40 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
             </motion.p>
           )}
         </div>
+
+        {/* ── Testimonials Carousel ── */}
+        {(testimonials || []).filter((t) => t.name && t.text).length > 0 && (
+          <motion.div variants={fadeUpVariants} className="w-full mt-6">
+            <p className="text-xs font-semibold mb-3 opacity-60 tracking-wide uppercase" style={{ color: theme.colors.text }}>
+              ★ Reviews
+            </p>
+            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
+              {(testimonials || []).filter((t) => t.name && t.text).map((t) => (
+                <motion.div
+                  key={t.id}
+                  variants={linkCardVariants}
+                  className="snap-start flex-shrink-0 w-[240px] p-4 rounded-xl"
+                  style={{
+                    background: theme.colors.cardBackground,
+                    border: `1px solid ${theme.colors.cardBackground}`,
+                  }}
+                >
+                  <div className="flex gap-0.5 mb-2">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <svg key={n} width="14" height="14" viewBox="0 0 24 24" fill={n <= t.rating ? "#facc15" : "none"} stroke={n <= t.rating ? "#facc15" : "currentColor"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    ))}
+                  </div>
+                  <p className="text-xs leading-relaxed opacity-80 line-clamp-4" style={{ color: theme.colors.text }}>
+                    &ldquo;{t.text}&rdquo;
+                  </p>
+                  <p className="text-[11px] font-semibold mt-2 opacity-60" style={{ color: theme.colors.text }}>
+                    — {t.name}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* ── Footer ── */}
         {settings.showFooter && (
