@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MapPin, Sparkles, UserPlus, Lock, MessageCircle, ChevronDown } from "lucide-react";
-import { useState as useReactState } from "react";
+import { useState as useReactState, useSyncExternalStore } from "react";
 import { useStore } from "@/lib/store";
 import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
@@ -169,7 +169,17 @@ const linkCardVariants = {
  * - whileTap press-down feedback
  */
 export function BioPage({ embedded = false }: { embedded?: boolean }) {
+  // Hydration guard: prevent WSOD from server/client localStorage mismatch
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const { profile, links, testimonials, theme, settings } = useStore((s) => s.config);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f0f0f" }}>
+        <Sparkles className="w-6 h-6 animate-pulse" style={{ color: "#a78bfa" }} />
+      </div>
+    );
+  }
 
   const enabledLinks = links
     .filter((l) => l.enabled)
