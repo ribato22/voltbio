@@ -53,6 +53,7 @@ const tabItems = [
 export default function EditorPage() {
   const mounted = useHasMounted();
   const [deployOpen, setDeployOpen] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "tablet" | "desktop">("mobile");
   const activePanel = useStore((s) => s.editor.activePanel);
   const showPreview = useStore((s) => s.editor.showPreview);
   const setActivePanel = useStore((s) => s.setActivePanel);
@@ -210,13 +211,45 @@ export default function EditorPage() {
         {/* ── Live Preview Panel (desktop only) ── */}
         {showPreview && (
           <div className="hidden lg:flex flex-col flex-1 bg-neutral-950/50">
-            {/* Phone frame */}
+            {/* Device toggle bar */}
+            <div className="flex items-center justify-center gap-1 py-2 px-4 border-b border-neutral-800">
+              {(["mobile", "tablet", "desktop"] as const).map((device) => {
+                const icons = { mobile: "📱", tablet: "💊", desktop: "💻" };
+                const labels = { mobile: "Mobile", tablet: "Tablet", desktop: "Desktop" };
+                return (
+                  <button
+                    key={device}
+                    type="button"
+                    onClick={() => setPreviewDevice(device)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
+                      previewDevice === device
+                        ? "bg-[var(--lf-accent)] text-white"
+                        : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                    )}
+                  >
+                    {icons[device]} {labels[device]}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Preview area */}
             <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto">
-              <div className="w-[375px] min-h-[700px] rounded-[2.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl overflow-hidden relative">
-                {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-7 bg-neutral-900 rounded-b-2xl z-10" />
+              <div
+                className={cn(
+                  "transition-all duration-300 ease-in-out overflow-hidden relative",
+                  previewDevice === "mobile" && "w-[375px] min-h-[700px] rounded-[2.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
+                  previewDevice === "tablet" && "w-[768px] min-h-[700px] rounded-[1.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
+                  previewDevice === "desktop" && "w-full max-w-5xl min-h-[600px] rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl"
+                )}
+              >
+                {/* Notch (mobile only) */}
+                {previewDevice === "mobile" && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-7 bg-neutral-900 rounded-b-2xl z-10" />
+                )}
                 {/* Screen */}
-                <div className="h-full overflow-y-auto pt-8">
+                <div className={cn("h-full overflow-y-auto", previewDevice === "mobile" && "pt-8")}>
                   <BioPage embedded />
                 </div>
               </div>

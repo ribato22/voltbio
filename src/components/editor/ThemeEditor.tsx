@@ -81,39 +81,94 @@ export function ThemeEditor() {
           Preset Themes
         </p>
         <div className="grid grid-cols-2 gap-2">
-          {themePresets.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => applyPreset(preset.id)}
-              className={cn(
-                "relative rounded-xl p-3 text-left transition-all duration-200 cursor-pointer",
-                "border-2",
-                theme.preset === preset.id
-                  ? "border-[var(--lf-accent)] shadow-md shadow-[var(--lf-accent)]/10"
-                  : "border-[var(--lf-border)] hover:border-[var(--lf-accent)]/40"
-              )}
-              aria-pressed={theme.preset === preset.id}
-              aria-label={`Select ${preset.name} theme`}
-            >
-              <div
-                className="w-full h-8 rounded-lg mb-2"
-                style={{ background: preset.preview }}
-              />
-              <p className="text-xs font-medium text-[var(--lf-text)]">
-                {preset.name}
-              </p>
-              <div className="flex gap-1 mt-1.5">
-                {Object.values(preset.colors).slice(0, 4).map((c, i) => (
-                  <div
-                    key={i}
-                    className="w-3 h-3 rounded-full border border-black/10"
-                    style={{ background: c }}
-                  />
-                ))}
-              </div>
-            </button>
-          ))}
+          {themePresets.map((preset) => {
+            const effect = preset.themeEffect || "none";
+            const effectPreviewStyle: React.CSSProperties = (() => {
+              switch (effect) {
+                case "glassmorphism":
+                  return {
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: "rgba(255,255,255,0.1)",
+                  };
+                case "brutalism":
+                  return {
+                    border: "2px solid #000",
+                    boxShadow: "2px 2px 0px #000",
+                    borderRadius: "0px",
+                    background: preset.colors.cardBackground,
+                  };
+                case "neon-glow":
+                  return {
+                    border: `1px solid ${preset.colors.accent}60`,
+                    boxShadow: `0 0 8px ${preset.colors.accent}40`,
+                    background: preset.colors.cardBackground,
+                  };
+                case "paper":
+                  return {
+                    border: "1px solid #e8e0d4",
+                    boxShadow: "1px 1px 4px rgba(139,115,85,0.15)",
+                    background: preset.colors.cardBackground,
+                  };
+                case "retrowave":
+                  return {
+                    borderBottom: `2px solid ${preset.colors.accent}`,
+                    background: `linear-gradient(180deg, ${preset.colors.accent}15, transparent)`,
+                  };
+                default:
+                  return { background: preset.colors.cardBackground };
+              }
+            })();
+
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => applyPreset(preset.id)}
+                className={cn(
+                  "relative rounded-xl p-3 text-left transition-all duration-200 cursor-pointer",
+                  "border-2",
+                  theme.preset === preset.id
+                    ? "border-[var(--lf-accent)] shadow-md shadow-[var(--lf-accent)]/10"
+                    : "border-[var(--lf-border)] hover:border-[var(--lf-accent)]/40"
+                )}
+                aria-pressed={theme.preset === preset.id}
+                aria-label={`Select ${preset.name} theme`}
+              >
+                {/* Gradient preview bar */}
+                <div
+                  className="w-full h-8 rounded-lg mb-2 relative overflow-hidden"
+                  style={{ background: preset.preview }}
+                >
+                  {/* Mini effect card inside thumbnail */}
+                  {effect !== "none" && (
+                    <div
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[70%] h-3 rounded-sm"
+                      style={effectPreviewStyle}
+                    />
+                  )}
+                </div>
+                <p className="text-xs font-medium text-[var(--lf-text)]">
+                  {preset.name}
+                </p>
+                <div className="flex items-center gap-1 mt-1.5">
+                  {Object.values(preset.colors).slice(0, 4).map((c, i) => (
+                    <div
+                      key={i}
+                      className="w-3 h-3 rounded-full border border-black/10"
+                      style={{ background: c }}
+                    />
+                  ))}
+                  {effect !== "none" && (
+                    <span className="ml-auto text-[9px] font-medium text-[var(--lf-muted)] tracking-wide uppercase">
+                      {effect === "neon-glow" ? "GLOW" : effect.toUpperCase().slice(0, 5)}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
