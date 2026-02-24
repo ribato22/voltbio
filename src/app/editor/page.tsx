@@ -10,6 +10,7 @@ import { ProfileEditor } from "@/components/editor/ProfileEditor";
 import { LinkEditor } from "@/components/editor/LinkEditor";
 import { ThemeEditor } from "@/components/editor/ThemeEditor";
 import { SeoEditor } from "@/components/editor/SeoEditor";
+import { QRCodeGenerator } from "@/components/editor/QRCodeGenerator";
 import { BioPage } from "@/components/preview/BioPage";
 import { Tabs, TabContent } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
@@ -161,6 +162,9 @@ export default function EditorPage() {
             >
               <TabContent value="profile">
                 <ProfileEditor />
+                <div className="mt-6 pt-6 border-t border-[var(--lf-border)]">
+                  <QRCodeGenerator />
+                </div>
               </TabContent>
               <TabContent value="links">
                 <LinkEditor />
