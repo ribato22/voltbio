@@ -7,7 +7,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
-import type { ProfileConfig, LinkItem, ThemeConfig, Profile, SeoConfig, AppSettings, EditorPanel, Testimonial } from "@/types";
+import type { ProfileConfig, LinkItem, ThemeConfig, Profile, SeoConfig, AppSettings, EditorPanel, Testimonial, HubTab } from "@/types";
 import { themePresets } from "@/lib/themes";
 
 const defaultConfig: ProfileConfig = {
@@ -31,6 +31,7 @@ const defaultConfig: ProfileConfig = {
     },
   ],
   testimonials: [],
+  pages: [],
   theme: {
     preset: "midnight",
     mode: "dark",
@@ -89,6 +90,11 @@ interface VoltBioStore {
   addTestimonial: () => void;
   updateTestimonial: (id: string, updates: Partial<Testimonial>) => void;
   removeTestimonial: (id: string) => void;
+
+  // Page/Hub actions
+  addPage: (label?: string) => void;
+  updatePage: (id: string, updates: Partial<HubTab>) => void;
+  removePage: (id: string) => void;
 
   // Editor UI actions
   setActivePanel: (panel: EditorPanel) => void;
@@ -300,6 +306,36 @@ export const useStore = create<VoltBioStore>()(
           },
         })),
 
+      // ── Pages / Hub ──
+      addPage: (label) =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            pages: [
+              ...(state.config.pages || []),
+              { id: nanoid(6), label: label || "New Tab", linkIds: [] },
+            ],
+          },
+        })),
+
+      updatePage: (id, updates) =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            pages: (state.config.pages || []).map((p) =>
+              p.id === id ? { ...p, ...updates } : p
+            ),
+          },
+        })),
+
+      removePage: (id) =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            pages: (state.config.pages || []).filter((p) => p.id !== id),
+          },
+        })),
+
       // ── Editor UI ──
       setActivePanel: (panel) =>
         set((state) => ({
@@ -317,14 +353,16 @@ export const useStore = create<VoltBioStore>()(
     }),
     {
       name: "voltbio-store",
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>;
-        if (version < 2) {
-          // Add testimonials array to configs persisted before v2
-          const cfg = state.config as Record<string, unknown> | undefined;
-          if (cfg && !Array.isArray(cfg.testimonials)) {
+        const cfg = state.config as Record<string, unknown> | undefined;
+        if (cfg) {
+          if (version < 2 && !Array.isArray(cfg.testimonials)) {
             cfg.testimonials = [];
+          }
+          if (version < 3 && !Array.isArray(cfg.pages)) {
+            cfg.pages = [];
           }
         }
         return state as unknown as VoltBioStore;

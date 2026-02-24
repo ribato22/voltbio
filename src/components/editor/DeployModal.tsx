@@ -15,15 +15,19 @@ import {
   Loader2,
   ExternalLink,
   Copy,
+  Zap,
+  Cloud,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type DeployTab = "vercel" | "netlify" | "github";
+type DeployTab = "netlify" | "vercel" | "tiiny" | "github";
 
-const tabs: { id: DeployTab; label: string; icon: React.ReactNode }[] = [
+const tabs: { id: DeployTab; label: string; icon: React.ReactNode; badge?: string }[] = [
+  { id: "netlify", label: "Netlify Drop", icon: <Rocket className="w-4 h-4" />, badge: "Easiest" },
   { id: "vercel", label: "Vercel", icon: <Globe className="w-4 h-4" /> },
-  { id: "netlify", label: "Netlify", icon: <Rocket className="w-4 h-4" /> },
-  { id: "github", label: "GitHub Pages", icon: <Github className="w-4 h-4" /> },
+  { id: "tiiny", label: "Tiiny.host", icon: <Zap className="w-4 h-4" /> },
+  { id: "github", label: "GitHub", icon: <Github className="w-4 h-4" /> },
 ];
 
 function Step({ n, children }: { n: number; children: React.ReactNode }) {
@@ -69,6 +73,20 @@ function CodeBlock({ children }: { children: string }) {
   );
 }
 
+function HostLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[var(--lf-accent)] underline underline-offset-2 inline-flex items-center gap-1 font-medium"
+    >
+      {children}
+      <ExternalLink className="w-3 h-3" />
+    </a>
+  );
+}
+
 export function DeployModal({
   open,
   onOpenChange,
@@ -76,7 +94,7 @@ export function DeployModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<DeployTab>("vercel");
+  const [activeTab, setActiveTab] = useState<DeployTab>("netlify");
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
   const config = useStore((s) => s.config);
@@ -96,43 +114,49 @@ export function DeployModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Export & Deploy"
-      description="Download your bio page and deploy it for free."
+      title="Publish Your Page"
+      description="Download your page and put it online in 30 seconds."
     >
       <div className="space-y-5">
-        {/* ── Export Button ── */}
-        <Button
-          onClick={handleExport}
-          disabled={exporting}
-          className="w-full"
-          size="lg"
-        >
-          {exporting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Generating…
-            </>
-          ) : exported ? (
-            <>
-              <Check className="w-4 h-4" />
-              Downloaded!
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4" />
-              Download ZIP
-            </>
-          )}
-        </Button>
+        {/* ── Step 1: Download ZIP ── */}
+        <div>
+          <p className="text-xs font-semibold text-[var(--lf-muted)] mb-2 uppercase tracking-wider flex items-center gap-1.5">
+            <Cloud className="w-3.5 h-3.5" />
+            Step 1 — Download
+          </p>
+          <Button
+            onClick={handleExport}
+            disabled={exporting}
+            className="w-full"
+            size="lg"
+          >
+            {exporting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating…
+              </>
+            ) : exported ? (
+              <>
+                <Check className="w-4 h-4" />
+                Downloaded!
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Download ZIP
+              </>
+            )}
+          </Button>
+          <p className="text-[10px] text-center text-[var(--lf-muted)] mt-2">
+            Your ZIP contains a self-contained <code>index.html</code> — no coding needed!
+          </p>
+        </div>
 
-        <p className="text-xs text-center text-[var(--lf-muted)]">
-          Your ZIP contains a self-contained <code>index.html</code> with inline CSS, SEO tags, and Open Graph metadata.
-        </p>
-
-        {/* ── Deploy Instructions Tabs ── */}
+        {/* ── Step 2: Choose hosting ── */}
         <div className="border-t border-[var(--lf-border)] pt-4">
-          <p className="text-xs font-medium text-[var(--lf-muted)] mb-3 uppercase tracking-wider">
-            Deploy for Free
+          <p className="text-xs font-semibold text-[var(--lf-muted)] mb-3 uppercase tracking-wider flex items-center gap-1.5">
+            <Rocket className="w-3.5 h-3.5" />
+            Step 2 — Put it online (free)
           </p>
 
           {/* Tab Buttons */}
@@ -143,7 +167,7 @@ export function DeployModal({
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
+                  "flex-1 flex items-center justify-center gap-1 py-2 px-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 cursor-pointer relative",
                   activeTab === tab.id
                     ? "bg-[var(--lf-accent)] text-white shadow-sm"
                     : "text-[var(--lf-muted)] hover:text-[var(--lf-text)]"
@@ -152,6 +176,16 @@ export function DeployModal({
               >
                 {tab.icon}
                 <span className="hidden sm:inline">{tab.label}</span>
+                {tab.badge && (
+                  <span className={cn(
+                    "absolute -top-1.5 -right-0.5 text-[8px] font-bold px-1 py-0.5 rounded-full leading-none",
+                    activeTab === tab.id
+                      ? "bg-white text-[var(--lf-accent)]"
+                      : "bg-[var(--lf-accent)] text-white"
+                  )}>
+                    <Star className="w-2 h-2 inline -mt-0.5" /> {tab.badge}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -166,46 +200,47 @@ export function DeployModal({
               transition={{ duration: 0.2 }}
               className="space-y-3"
             >
-              {activeTab === "vercel" && (
+              {activeTab === "netlify" && (
                 <>
+                  <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-300 mb-1">
+                    ⚡ <strong>Recommended!</strong> No account needed. Just drag & drop.
+                  </div>
                   <Step n={1}>
-                    Go to <a
-                      href="https://vercel.com/new"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--lf-accent)] underline underline-offset-2 inline-flex items-center gap-1"
-                    >
-                      vercel.com/new
-                      <ExternalLink className="w-3 h-3" />
-                    </a> and click <strong>&quot;Upload&quot;</strong>.
+                    Buka <HostLink href="https://app.netlify.com/drop">app.netlify.com/drop</HostLink>
                   </Step>
                   <Step n={2}>
-                    Unzip the downloaded file and <strong>drag the folder</strong> into the upload area.
+                    Ekstrak file ZIP yang sudah diunduh, lalu <strong>seret folder</strong> ke area upload di halaman tersebut.
                   </Step>
                   <Step n={3}>
-                    Vercel will deploy instantly with a free <code>.vercel.app</code> URL! ✨
+                    Selesai! Website kamu langsung online dengan URL gratis <code>.netlify.app</code> 🎉
                   </Step>
                 </>
               )}
 
-              {activeTab === "netlify" && (
+              {activeTab === "vercel" && (
                 <>
                   <Step n={1}>
-                    Go to <a
-                      href="https://app.netlify.com/drop"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--lf-accent)] underline underline-offset-2 inline-flex items-center gap-1"
-                    >
-                      app.netlify.com/drop
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                    Buka <HostLink href="https://vercel.com/new">vercel.com/new</HostLink> dan klik tombol <strong>&quot;Upload&quot;</strong>.
                   </Step>
                   <Step n={2}>
-                    <strong>Drag & drop</strong> your unzipped folder directly onto the page.
+                    Ekstrak file ZIP, lalu <strong>seret folder</strong> ke area upload.
                   </Step>
                   <Step n={3}>
-                    Your site is live on a free <code>.netlify.app</code> URL! 🚀
+                    Vercel akan langsung deploy dengan URL gratis <code>.vercel.app</code>! ✨
+                  </Step>
+                </>
+              )}
+
+              {activeTab === "tiiny" && (
+                <>
+                  <Step n={1}>
+                    Buka <HostLink href="https://tiiny.host">tiiny.host</HostLink>
+                  </Step>
+                  <Step n={2}>
+                    <strong>Upload langsung file ZIP</strong> (tidak perlu diekstrak dulu!).
+                  </Step>
+                  <Step n={3}>
+                    Pilih subdomain yang kamu inginkan, lalu klik <strong>Launch</strong>. Gratis untuk 1 minggu! 🚀
                   </Step>
                 </>
               )}
@@ -213,17 +248,17 @@ export function DeployModal({
               {activeTab === "github" && (
                 <>
                   <Step n={1}>
-                    Create a new GitHub repository (or use an existing one).
+                    Buat repository baru di GitHub.
                   </Step>
                   <Step n={2}>
-                    Unzip the downloaded file and push the contents:
-                    <CodeBlock>{`git init\ngit add .\ngit commit -m "Deploy bio page"\ngit remote add origin https://github.com/YOU/YOUR-REPO.git\ngit push -u origin main`}</CodeBlock>
+                    Ekstrak ZIP, lalu upload isinya ke repository:
+                    <CodeBlock>{`git init\ngit add .\ngit commit -m "Deploy bio page"\ngit remote add origin https://github.com/YOU/REPO.git\ngit push -u origin main`}</CodeBlock>
                   </Step>
                   <Step n={3}>
-                    Go to <strong>Settings → Pages</strong>, select <strong>main branch</strong>, and click Save.
+                    Buka <strong>Settings → Pages</strong>, pilih <strong>main branch</strong>, klik Save.
                   </Step>
                   <Step n={4}>
-                    Your site will be live at <code>https://YOU.github.io/YOUR-REPO</code> 🎉
+                    Website live di <code>https://YOU.github.io/REPO</code> 🎉
                   </Step>
                 </>
               )}

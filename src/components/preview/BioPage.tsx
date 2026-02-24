@@ -171,7 +171,8 @@ const linkCardVariants = {
 export function BioPage({ embedded = false }: { embedded?: boolean }) {
   // Hydration guard: prevent WSOD from server/client localStorage mismatch
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
-  const { profile, links, testimonials, theme, settings } = useStore((s) => s.config);
+  const { profile, links, testimonials, pages, theme, settings } = useStore((s) => s.config);
+  const [activeTab, setActiveTab] = useReactState<string | null>(null);
 
   if (!mounted) {
     return (
@@ -304,9 +305,52 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
           </motion.button>
         )}
 
+        {/* ── Tab Navigation ── */}
+        {(pages || []).length > 0 && (
+          <motion.div variants={fadeUpVariants} className="w-full mt-6 mb-2">
+            <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+              <button
+                type="button"
+                onClick={() => setActiveTab(null)}
+                className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer"
+                style={{
+                  background: activeTab === null ? theme.colors.accent : `${theme.colors.accent}15`,
+                  color: activeTab === null ? "#fff" : theme.colors.text,
+                  opacity: activeTab === null ? 1 : 0.7,
+                }}
+              >
+                All
+              </button>
+              {(pages || []).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer"
+                  style={{
+                    background: activeTab === tab.id ? theme.colors.accent : `${theme.colors.accent}15`,
+                    color: activeTab === tab.id ? "#fff" : theme.colors.text,
+                    opacity: activeTab === tab.id ? 1 : 0.7,
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* ── Links ── */}
         <div className="links-container w-full mt-8 space-y-3">
-          {enabledLinks.map((link) => {
+          {enabledLinks.filter((link) => {
+            if (!activeTab || !(pages || []).length) return true;
+            const activePage = (pages || []).find((p) => p.id === activeTab);
+            if (!activePage) return true;
+            // Show link if it's in the active tab's linkIds, or if not assigned to any tab
+            if (activePage.linkIds.includes(link.id)) return true;
+            const assignedAnywhere = (pages || []).some((p) => p.linkIds.includes(link.id));
+            return !assignedAnywhere;
+          }).map((link) => {
             // ── Section Header ──
             if (link.type === "header") {
               return (

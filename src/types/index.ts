@@ -10,6 +10,13 @@ export interface Testimonial {
   rating: 1 | 2 | 3 | 4 | 5;
 }
 
+/** Tab/page in the Multi-Page Hub */
+export interface HubTab {
+  id: string;
+  label: string;
+  linkIds: string[];  // ordered list of LinkItem IDs in this tab
+}
+
 /** Field definition for Smart Action Buttons */
 export interface ActionField {
   id: string;
@@ -104,6 +111,7 @@ export interface ProfileConfig {
   profile: Profile;
   links: LinkItem[];
   testimonials?: Testimonial[];
+  pages?: HubTab[];
   theme: ThemeConfig;
   seo: SeoConfig;
   settings: AppSettings;
@@ -120,4 +128,4 @@ export interface ThemePreset {
 }
 
 /** Editor active panel */
-export type EditorPanel = "profile" | "links" | "theme" | "seo" | "settings" | "testimonials";
+export type EditorPanel = "profile" | "links" | "theme" | "seo" | "settings" | "testimonials" | "pages";
