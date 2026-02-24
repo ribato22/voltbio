@@ -34,6 +34,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  Calendar,
 } from "lucide-react";
 import type { LinkItem } from "@/types";
 
@@ -207,6 +208,56 @@ function SortableLinkItem({
                   )}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* ── Schedule Settings ── */}
+          <div>
+            <p className="text-xs font-medium text-[var(--lf-muted)] mb-2 flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              Schedule (optional)
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] mb-0.5 block">Start Date</label>
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    value={link.validFrom || ""}
+                    onChange={(e) => onUpdate(link.id, { validFrom: e.target.value || undefined })}
+                    className="w-full text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+                  />
+                  {link.validFrom && (
+                    <button
+                      type="button"
+                      onClick={() => onUpdate(link.id, { validFrom: undefined })}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--lf-muted)] hover:text-[var(--lf-text)] text-[10px] cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] mb-0.5 block">End Date</label>
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    value={link.validUntil || ""}
+                    onChange={(e) => onUpdate(link.id, { validUntil: e.target.value || undefined })}
+                    className="w-full text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+                  />
+                  {link.validUntil && (
+                    <button
+                      type="button"
+                      onClick={() => onUpdate(link.id, { validUntil: undefined })}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--lf-muted)] hover:text-[var(--lf-text)] text-[10px] cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

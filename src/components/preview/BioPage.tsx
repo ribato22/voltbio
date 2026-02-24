@@ -64,6 +64,12 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
 
   const enabledLinks = links
     .filter((l) => l.enabled)
+    .filter((l) => {
+      const now = new Date();
+      if (l.validFrom && new Date(l.validFrom) > now) return false;
+      if (l.validUntil && new Date(l.validUntil) < now) return false;
+      return true;
+    })
     .sort((a, b) => a.order - b.order);
 
   const buttonRadius =

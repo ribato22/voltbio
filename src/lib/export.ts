@@ -61,6 +61,10 @@ function generateHtml(config: ProfileConfig): string {
       const iconKey = detectSocialIcon(link.url);
       const rel = link.target === "_blank" ? ' rel="noopener noreferrer"' : "";
       const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;
+      const schedAttrs = [
+        link.validFrom ? ` data-valid-from="${escapeHtml(link.validFrom)}"` : "",
+        link.validUntil ? ` data-valid-until="${escapeHtml(link.validUntil)}"` : "",
+      ].join("");
 
       // Embed iframe
       if (link.isEmbed && embedInfo) {
@@ -71,7 +75,7 @@ function generateHtml(config: ProfileConfig): string {
           ? 'style="aspect-ratio:16/9;width:100%;border:none"'
           : `style="height:${getSpotifyHeight(embedInfo.type)}px;width:100%;border:none"`;
         return `
-      <div class="embed-card" style="border:1px solid ${theme.colors.cardBackground};border-radius:0.75rem;overflow:hidden;width:100%">
+      <div class="embed-card scheduled-link" style="border:1px solid ${theme.colors.cardBackground};border-radius:0.75rem;overflow:hidden;width:100%"${schedAttrs}>
         ${titleHtml}
         <iframe src="${embedInfo.embedUrl}" title="${escapeHtml(link.title || 'Embedded media')}" ${iframeHeight} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
       </div>`;
@@ -80,7 +84,7 @@ function generateHtml(config: ProfileConfig): string {
       // Standard link button
       return `
       <a href="${safeUrl || "#"}" target="${link.target}"${rel}
-         class="link-card"
+         class="link-card scheduled-link"${schedAttrs}
          style="
            background: ${isOutline ? "transparent" : theme.colors.cardBackground};
            color: ${theme.colors.text};
@@ -159,7 +163,7 @@ function generateHtml(config: ProfileConfig): string {
   ${seo.ogImage ? `<meta name="twitter:image" content="${escapeHtml(seo.ogImage)}" />` : ""}
 
   <!-- CSP -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; frame-src 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; frame-src 'self' https://www.youtube.com https://open.spotify.com;" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -313,6 +317,17 @@ function generateHtml(config: ProfileConfig): string {
     ${footerHtml}
   </main>
   ${vcardScript}
+  <script>
+  (function(){
+    var now=new Date();
+    document.querySelectorAll('.scheduled-link').forEach(function(el){
+      var from=el.getAttribute('data-valid-from');
+      var until=el.getAttribute('data-valid-until');
+      if(from&&new Date(from)>now){el.style.display='none';}
+      if(until&&new Date(until)<now){el.style.display='none';}
+    });
+  })();
+  </script>
 </body>
 </html>`;
 }

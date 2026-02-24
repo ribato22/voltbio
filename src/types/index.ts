@@ -12,6 +12,8 @@ export interface LinkItem {
   order: number;
   target: "_blank" | "_self";
   isEmbed?: boolean;
+  validFrom?: string;
+  validUntil?: string;
 }
 
 /** User profile information */

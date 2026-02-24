@@ -37,7 +37,7 @@ export default function RootLayout({
         {/* Content Security Policy — static export can't use headers(), so we use meta */}
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self';"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; frame-src 'self' https://www.youtube.com https://open.spotify.com; base-uri 'self'; form-action 'self';"
         />
         {/* Prevent FOUC: apply theme mode before React hydrates */}
         <script
