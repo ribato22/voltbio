@@ -8,12 +8,13 @@
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Deploy](https://img.shields.io/badge/Deploy-GitHub_Pages-222?logo=github)](https://github.com)
+[![Deploy](https://img.shields.io/badge/Deploy-GitHub_Pages-222?logo=github)](https://ribato22.github.io/voltbio/)
 
 <br />
 
-<!-- Replace with actual screenshot -->
-> **🎬 Live Demo**: _Deploy this project to see it in action!_
+![VoltBio Editor Demo](./public/assets/screenshot-editor.png)
+
+**🎬 [Live Demo](https://ribato22.github.io/voltbio/)** · **[Open Editor](https://ribato22.github.io/voltbio/editor)**
 
 <br />
 
@@ -113,8 +114,8 @@ src/
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/link-in-bio.git
-cd link-in-bio
+git clone https://github.com/ribato22/voltbio.git
+cd voltbio
 
 # Install dependencies
 npm install
