@@ -272,6 +272,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
   const { profile, links, testimonials, pages, theme, settings, floatingButton } = useStore((s) => s.config);
   const [activeTab, setActiveTab] = useReactState<string | null>(null);
   const [lightboxState, setLightboxState] = useReactState<{ images: PortfolioImage[]; index: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useReactState("");
 
   if (!mounted) {
     return (
@@ -440,6 +441,31 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
           </motion.div>
         )}
 
+        {/* ── Search Bar ── */}
+        {settings.enableSearch && (
+          <div className="w-full mt-6 mb-2">
+            <input
+              type="search"
+              placeholder="Search links..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.625rem 1rem 0.625rem 2.5rem",
+                borderRadius: "0.75rem",
+                border: `1px solid ${theme.colors.accent}25`,
+                background: `${theme.colors.accent}08`,
+                color: theme.colors.text,
+                fontSize: "0.875rem",
+                outline: "none",
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(theme.colors.text)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "0.75rem center",
+              }}
+            />
+          </div>
+        )}
+
         {/* ── Links ── */}
         <div className="links-container w-full mt-8 space-y-3">
           {enabledLinks.filter((link) => {
@@ -448,6 +474,15 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
             if (!activePage) return true;
             // Strict: only show links explicitly assigned to this tab
             return activePage.linkIds.includes(link.id);
+          }).filter((link) => {
+            if (!searchQuery.trim()) return true;
+            // FAQ items are searchable by title and Q&A content
+            if (link.type === "faq") {
+              const faqText = (link.faqItems || []).map(i => i.question + " " + i.answer).join(" ");
+              return (link.title + " " + faqText).toLowerCase().includes(searchQuery.toLowerCase());
+            }
+            // Headers, countdowns, etc. searched by title only
+            return link.title.toLowerCase().includes(searchQuery.toLowerCase());
           }).map((link) => {
             // ── Section Header ──
             if (link.type === "header") {
@@ -623,6 +658,67 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                     accentColor={theme.colors.accent}
                     textColor={theme.colors.text}
                   />
+                </motion.div>
+              );
+            }
+
+            // ── FAQ Accordion Block ──
+            if (link.type === "faq" && link.faqItems?.length) {
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="faq-block w-full"
+                >
+                  {link.title && (
+                    <p
+                      className="text-sm font-semibold mb-2"
+                      style={{ color: theme.colors.text }}
+                    >
+                      {link.title}
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    {link.faqItems.map((item, idx) => (
+                      <details
+                        key={idx}
+                        style={{
+                          borderRadius: "0.75rem",
+                          border: `1px solid ${theme.colors.accent}20`,
+                          background: `${theme.colors.accent}08`,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <summary
+                          style={{
+                            padding: "0.75rem 1rem",
+                            cursor: "pointer",
+                            fontWeight: 600,
+                            fontSize: "0.875rem",
+                            color: theme.colors.text,
+                            listStyle: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          {item.question}
+                          <span style={{ fontSize: "0.75rem", opacity: 0.5, transition: "transform 0.2s" }}>▼</span>
+                        </summary>
+                        <div
+                          style={{
+                            padding: "0 1rem 0.75rem",
+                            fontSize: "0.8125rem",
+                            lineHeight: 1.6,
+                            color: theme.colors.text,
+                            opacity: 0.8,
+                          }}
+                        >
+                          {item.answer}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
                 </motion.div>
               );
             }

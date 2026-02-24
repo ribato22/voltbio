@@ -49,6 +49,7 @@ import {
   Image,
   Mail,
   Timer,
+  HelpCircle,
 } from "lucide-react";
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
@@ -228,7 +229,7 @@ function SortableLinkItem({
         {/* Title & URL */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--lf-text)] truncate">
-            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.type === "action" ? `⚡ ${link.title || "Action"}` : link.type === "countdown" ? `⏰ ${link.title || "Countdown"}` : link.type === "donation" ? `☕ ${link.title || "Donation"}` : link.type === "portfolio" ? `🖼️ ${link.title || "Portfolio"}` : link.type === "lead-form" ? `✉️ ${link.title || "Contact Form"}` : link.title || "Untitled"}
+            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.type === "action" ? `⚡ ${link.title || "Action"}` : link.type === "countdown" ? `⏰ ${link.title || "Countdown"}` : link.type === "donation" ? `☕ ${link.title || "Donation"}` : link.type === "portfolio" ? `🖼️ ${link.title || "Portfolio"}` : link.type === "lead-form" ? `✉️ ${link.title || "Contact Form"}` : link.type === "faq" ? `❓ ${link.title || "FAQ"}` : link.title || "Untitled"}
           </p>
           {link.type === "action" && link.actionConfig?.whatsappNumber && (
             <p className="text-xs text-[var(--lf-muted)] truncate">
@@ -889,6 +890,66 @@ function SortableLinkItem({
             </div>
           )}
 
+          {/* ── FAQ Accordion Config ── */}
+          {link.type === "faq" && (
+            <div className="space-y-3 p-3 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+              <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+                <HelpCircle className="w-3.5 h-3.5" />
+                FAQ Items
+              </p>
+              {(link.faqItems || []).map((item, idx) => (
+                <div key={idx} className="space-y-1.5 p-2.5 rounded-lg border border-[var(--lf-border)] bg-[var(--lf-card-bg)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium">Q{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const items = [...(link.faqItems || [])];
+                        items.splice(idx, 1);
+                        onUpdate(link.id, { faqItems: items });
+                      }}
+                      className="text-red-400 hover:text-red-300 text-xs cursor-pointer"
+                    >
+                      ✖
+                    </button>
+                  </div>
+                  <Input
+                    label="Question"
+                    value={item.question}
+                    onChange={(e) => {
+                      const items = [...(link.faqItems || [])];
+                      items[idx] = { ...items[idx], question: e.target.value };
+                      onUpdate(link.id, { faqItems: items });
+                    }}
+                    placeholder="How does this work?"
+                  />
+                  <Input
+                    label="Answer"
+                    value={item.answer}
+                    onChange={(e) => {
+                      const items = [...(link.faqItems || [])];
+                      items[idx] = { ...items[idx], answer: e.target.value };
+                      onUpdate(link.id, { faqItems: items });
+                    }}
+                    placeholder="It works like magic!"
+                  />
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  const items = [...(link.faqItems || []), { question: "", answer: "" }];
+                  onUpdate(link.id, { faqItems: items });
+                }}
+                className="w-full"
+              >
+                <PlusIcon className="w-3.5 h-3.5" />
+                Add Q&A
+              </Button>
+            </div>
+          )}
+
           <Button
             variant="danger"
             size="sm"
@@ -896,7 +957,7 @@ function SortableLinkItem({
             className="w-full"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : link.type === "lead-form" ? "Delete Form" : link.type === "countdown" ? "Delete Timer" : "Delete Link"}
+            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : link.type === "lead-form" ? "Delete Form" : link.type === "countdown" ? "Delete Timer" : link.type === "faq" ? "Delete FAQ" : "Delete Link"}
           </Button>
         </div>
       )}
@@ -917,6 +978,7 @@ export function LinkEditor() {
   const addPortfolio = useStore((s) => s.addPortfolio);
   const addLeadForm = useStore((s) => s.addLeadForm);
   const addCountdown = useStore((s) => s.addCountdown);
+  const addFaq = useStore((s) => s.addFaq);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -981,6 +1043,10 @@ export function LinkEditor() {
           <Button size="sm" variant="secondary" onClick={() => addCountdown()}>
             <Timer className="w-3.5 h-3.5" />
             Countdown
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => addFaq()}>
+            <HelpCircle className="w-3.5 h-3.5" />
+            FAQ
           </Button>
           <Button size="sm" onClick={() => addLink()}>
             <Plus className="w-3.5 h-3.5" />

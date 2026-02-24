@@ -42,8 +42,8 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
-  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid, 'lead-form' = contact form, 'countdown' = countdown timer */
-  type?: "link" | "header" | "action" | "donation" | "portfolio" | "lead-form" | "countdown";
+  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid, 'lead-form' = contact form, 'countdown' = countdown timer, 'faq' = accordion FAQ */
+  type?: "link" | "header" | "action" | "donation" | "portfolio" | "lead-form" | "countdown" | "faq";
   isEmbed?: boolean;
   /** Display as inline PDF viewer */
   isPdfEmbed?: boolean;
@@ -73,6 +73,8 @@ export interface LinkItem {
   targetDate?: string;       // ISO date string for countdown target
   timerLabel?: string;       // Label text, e.g. "Promo Berakhir Dalam:"
   timerStyle?: "minimal" | "card" | "flip";  // Visual style
+  /** FAQ Accordion items */
+  faqItems?: { question: string; answer: string }[];
 }
 
 /** A single image in a portfolio grid block */
@@ -137,6 +139,8 @@ export interface AppSettings {
   pwaEnabled?: boolean;
   /** Short name shown below home screen icon (max 12 chars) */
   pwaShortName?: string;
+  /** Enable search/filter bar above links */
+  enableSearch?: boolean;
 }
 
 /** Floating Action Button config */

@@ -278,6 +278,26 @@ export function SeoEditor() {
           )}
         </div>
 
+        {/* ── Search Bar ── */}
+        <div className="space-y-3 p-3.5 rounded-xl bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5" />
+              Search Bar
+            </p>
+            <Toggle
+              checked={!!settings.enableSearch}
+              onCheckedChange={(v) => updateSettings({ enableSearch: v })}
+              id="search-toggle"
+            />
+          </div>
+          {settings.enableSearch && (
+            <p className="text-[10px] text-[var(--lf-muted)]">
+              Visitors can filter links by typing in a search bar above your link list.
+            </p>
+          )}
+        </div>
+
         {/* ── PWA Install & Offline ── */}
         <div className="space-y-3 p-3.5 rounded-xl bg-[var(--lf-bg)] border border-[var(--lf-border)]">
           <div className="flex items-center justify-between">

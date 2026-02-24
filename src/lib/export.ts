@@ -276,6 +276,27 @@ function generateHtml(config: ProfileConfig): string {
       </script>`;
       }
 
+      // FAQ Accordion Block — pure <details>/<summary>, zero JS!
+      if (link.type === "faq" && link.faqItems?.length) {
+        const title = escapeHtml(link.title || "");
+        const itemsHtml = link.faqItems.map((item) => `
+        <details style="border-radius:0.75rem;border:1px solid ${theme.colors.accent}20;background:${theme.colors.accent}08;overflow:hidden;margin-bottom:0.5rem">
+          <summary style="padding:0.75rem 1rem;cursor:pointer;font-weight:600;font-size:0.875rem;color:${theme.colors.text};list-style:none;display:flex;align-items:center;justify-content:space-between">
+            ${escapeHtml(item.question)}
+            <span class="faq-arrow" style="font-size:0.75rem;opacity:0.5;transition:transform 0.2s">▼</span>
+          </summary>
+          <div style="padding:0 1rem 0.75rem;font-size:0.8125rem;line-height:1.6;color:${theme.colors.text};opacity:0.8">
+            ${escapeHtml(item.answer)}
+          </div>
+        </details>`).join("");
+
+        return `
+      <div class="link-card" data-title="${escapeHtml(link.title || '')}" style="width:100%">
+        ${title ? `<p style="font-size:0.875rem;font-weight:600;margin-bottom:0.5rem;color:${theme.colors.text}">${title}</p>` : ""}
+        ${itemsHtml}
+      </div>`;
+      }
+
       // Lead Form / Contact Form Block
       if (link.type === "lead-form") {
         const fields = link.formFields || ["name", "email", "message"];
@@ -723,6 +744,10 @@ function generateHtml(config: ProfileConfig): string {
     <p class="bio">${escapeHtml(profile.bio || "Welcome to my link page")}</p>
     ${vcardButtonHtml}
     <div class="links">
+      ${settings.enableSearch ? `
+      <div style="margin-bottom:1rem">
+        <input type="search" id="voltbio-search" placeholder="Search links..." style="width:100%;padding:0.625rem 1rem 0.625rem 2.5rem;border-radius:0.75rem;border:1px solid ${theme.colors.accent}25;background:${theme.colors.accent}08;color:${theme.colors.text};font-size:0.875rem;outline:none;background-image:url(%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(theme.colors.text)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E%22);background-repeat:no-repeat;background-position:0.75rem center" />
+      </div>` : ""}
       ${linksHtml}
     </div>
     ${testimonialsHtml}
@@ -741,6 +766,25 @@ function generateHtml(config: ProfileConfig): string {
     });
   })();
   </script>
+
+  ${settings.enableSearch ? `<script>
+  (function(){
+    var input=document.getElementById('voltbio-search');
+    if(!input) return;
+    input.addEventListener('input',function(){
+      var q=this.value.toLowerCase();
+      document.querySelectorAll('.link-card,.section-header,.countdown-block,.faq-block').forEach(function(el){
+        var t=(el.getAttribute('data-title')||el.textContent||'').toLowerCase();
+        el.style.display=t.indexOf(q)>-1?'':'none';
+      });
+    });
+  })();
+  </script>` : ""}
+
+  <style>
+    details summary::-webkit-details-marker { display: none; }
+    details[open] .faq-arrow { transform: rotate(180deg); }
+  </style>
 </body>
 </html>`;
 }

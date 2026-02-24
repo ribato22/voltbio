@@ -75,6 +75,7 @@ interface VoltBioStore {
   addPortfolio: () => void;
   addLeadForm: () => void;
   addCountdown: () => void;
+  addFaq: () => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -289,6 +290,27 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, countdown],
+            },
+          };
+        }),
+
+      addFaq: () =>
+        set((state) => {
+          const faq: LinkItem = {
+            id: nanoid(10),
+            title: "❓ FAQ",
+            url: "",
+            icon: "help-circle",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_self",
+            type: "faq",
+            faqItems: [{ question: "What is this?", answer: "This is an FAQ section." }],
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, faq],
             },
           };
         }),
