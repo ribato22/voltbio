@@ -26,6 +26,7 @@ import { Toggle } from "@/components/ui/Toggle";
 import { SocialIcon } from "@/components/preview/SocialIcon";
 import { detectSocialIcon, cn } from "@/lib/utils";
 import { isEmbeddable, detectEmbed } from "@/lib/embed";
+import { detectPdfUrl } from "@/lib/utils";
 import {
   Link2,
   Plus,
@@ -42,6 +43,7 @@ import {
   Zap,
   Plus as PlusIcon,
   Trash2 as Trash2Icon,
+  FileText,
 } from "lucide-react";
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
@@ -265,6 +267,23 @@ function SortableLinkItem({
                 );
               })()}
 
+              {/* ── PDF Embed Toggle ── */}
+              {!link.isEmbed && detectPdfUrl(link.url) && (
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-red-500/5 border border-red-500/20">
+                  <span className="text-xs font-medium text-[var(--lf-text)] flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-red-500" />
+                    Display as PDF Document
+                  </span>
+                  <Toggle
+                    checked={!!link.isPdfEmbed}
+                    onCheckedChange={() =>
+                      onUpdate(link.id, { isPdfEmbed: !link.isPdfEmbed })
+                    }
+                    id={`pdf-${link.id}`}
+                  />
+                </div>
+              )}
+
               <div>
                 <p className="text-xs font-medium text-[var(--lf-muted)] mb-2">
                   Open in
@@ -440,44 +459,63 @@ function SortableLinkItem({
                 </div>
                 <div className="space-y-2">
                   {link.actionConfig.fields.map((field, fi) => (
-                    <div
-                      key={field.id}
-                      className="flex items-center gap-1.5 p-2 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]"
-                    >
-                      <input
-                        type="text"
-                        value={field.label}
-                        onChange={(e) => {
-                          const fields = [...link.actionConfig!.fields];
-                          fields[fi] = { ...fields[fi], label: e.target.value };
-                          onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
-                        }}
-                        placeholder="Label"
-                        className="flex-1 text-xs px-2 py-1 rounded bg-transparent text-[var(--lf-text)] focus:outline-none"
-                      />
-                      <select
-                        value={field.type}
-                        onChange={(e) => {
-                          const fields = [...link.actionConfig!.fields];
-                          fields[fi] = { ...fields[fi], type: e.target.value as ActionField["type"] };
-                          onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
-                        }}
-                        className="text-[10px] px-1.5 py-1 rounded bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] cursor-pointer"
-                      >
-                        <option value="text">Text</option>
-                        <option value="date">Date</option>
-                        <option value="select">Select</option>
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const fields = link.actionConfig!.fields.filter((_, i) => i !== fi);
-                          onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
-                        }}
-                        className="p-1 text-[var(--lf-muted)] hover:text-red-400 cursor-pointer"
-                      >
-                        <Trash2Icon className="w-3 h-3" />
-                      </button>
+                    <div key={field.id} className="rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] overflow-hidden">
+                      <div className="flex items-center gap-1.5 p-2">
+                        <input
+                          type="text"
+                          value={field.label}
+                          onChange={(e) => {
+                            const fields = [...link.actionConfig!.fields];
+                            fields[fi] = { ...fields[fi], label: e.target.value };
+                            onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                          }}
+                          placeholder="Label"
+                          className="flex-1 text-xs px-2 py-1 rounded bg-transparent text-[var(--lf-text)] focus:outline-none"
+                        />
+                        <select
+                          value={field.type}
+                          onChange={(e) => {
+                            const fields = [...link.actionConfig!.fields];
+                            fields[fi] = { ...fields[fi], type: e.target.value as ActionField["type"] };
+                            onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                          }}
+                          className="text-[10px] px-1.5 py-1 rounded bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] cursor-pointer"
+                        >
+                          <option value="text">Text</option>
+                          <option value="date">Date</option>
+                          <option value="select">Select</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const fields = link.actionConfig!.fields.filter((_, i) => i !== fi);
+                            onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                          }}
+                          className="p-1 text-[var(--lf-muted)] hover:text-red-400 cursor-pointer"
+                        >
+                          <Trash2Icon className="w-3 h-3" />
+                        </button>
+                      </div>
+                      {/* Select Options Input */}
+                      {field.type === "select" && (
+                        <div className="px-2 pb-2">
+                          <input
+                            type="text"
+                            value={(field.options || []).join(", ")}
+                            onChange={(e) => {
+                              const fields = [...link.actionConfig!.fields];
+                              const opts = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                              fields[fi] = { ...fields[fi], options: opts };
+                              onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                            }}
+                            placeholder="Options (comma-separated): Konsultasi, Pemeriksaan, Pemasangan Baru"
+                            className="w-full text-[10px] px-2 py-1.5 rounded bg-[var(--lf-border)]/30 border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+                          />
+                          <p className="text-[9px] text-[var(--lf-muted)] mt-0.5">
+                            Separate options with commas
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

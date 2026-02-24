@@ -99,3 +99,22 @@ export function getAvatarFallback(name: string): string {
     .toUpperCase()
     .slice(0, 2);
 }
+
+/**
+ * Detect if a URL points to a PDF document.
+ * Supports: direct .pdf URLs, Google Drive file links.
+ * Returns the embeddable URL or null.
+ */
+export function detectPdfUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    // Direct .pdf links
+    if (u.pathname.toLowerCase().endsWith(".pdf")) return url;
+    // Google Drive: /file/d/FILE_ID/view → preview embed
+    const driveMatch = u.href.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+    return null;
+  } catch {
+    return null;
+  }
+}

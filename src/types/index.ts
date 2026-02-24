@@ -30,6 +30,8 @@ export interface LinkItem {
   /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button */
   type?: "link" | "header" | "action";
   isEmbed?: boolean;
+  /** Display as inline PDF viewer */
+  isPdfEmbed?: boolean;
   validFrom?: string;
   validUntil?: string;
   /** Password-protected link fields */
