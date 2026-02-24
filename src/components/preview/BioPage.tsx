@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
 import { detectSocialIcon, sanitizeUrl, getAvatarFallback, cn } from "@/lib/utils";
 
@@ -158,6 +159,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                 href={safeUrl || "#"}
                 target={link.target}
                 rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
+                onClick={() => trackClick(link.id)}
                 aria-label={`${link.title}${link.target === "_blank" ? " (opens in new tab)" : ""}`}
                 className="group flex items-center gap-3 w-full px-5 py-3.5 text-sm font-medium transition-shadow duration-200"
                 style={{

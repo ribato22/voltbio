@@ -11,6 +11,7 @@ import { LinkEditor } from "@/components/editor/LinkEditor";
 import { ThemeEditor } from "@/components/editor/ThemeEditor";
 import { SeoEditor } from "@/components/editor/SeoEditor";
 import { QRCodeGenerator } from "@/components/editor/QRCodeGenerator";
+import { AnalyticsDashboard } from "@/components/editor/AnalyticsDashboard";
 import { BioPage } from "@/components/preview/BioPage";
 import { Tabs, TabContent } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
@@ -168,6 +169,9 @@ export default function EditorPage() {
               </TabContent>
               <TabContent value="links">
                 <LinkEditor />
+                <div className="mt-6 pt-6 border-t border-[var(--lf-border)]">
+                  <AnalyticsDashboard />
+                </div>
               </TabContent>
               <TabContent value="theme">
                 <ThemeEditor />
