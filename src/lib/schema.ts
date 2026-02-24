@@ -4,6 +4,20 @@
 
 import { z } from "zod";
 
+const ActionFieldSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  placeholder: z.string(),
+  type: z.enum(["text", "date", "select"]),
+  options: z.array(z.string()).optional(),
+});
+
+const ActionConfigSchema = z.object({
+  whatsappNumber: z.string(),
+  messageTemplate: z.string().max(2000),
+  fields: z.array(ActionFieldSchema).max(10),
+});
+
 export const LinkSchema = z.object({
   id: z.string(),
   title: z.string().min(1, "Title is required").max(100),
@@ -13,11 +27,12 @@ export const LinkSchema = z.object({
   order: z.number().int().min(0),
   target: z.enum(["_blank", "_self"]).default("_blank"),
   isEmbed: z.boolean().optional(),
-  type: z.enum(["link", "header"]).optional(),
+  type: z.enum(["link", "header", "action"]).optional(),
   validFrom: z.string().optional(),
   validUntil: z.string().optional(),
   isLocked: z.boolean().optional(),
   encryptedUrl: z.string().optional(),
+  actionConfig: ActionConfigSchema.optional(),
 });
 
 export const ProfileSchema = z.object({

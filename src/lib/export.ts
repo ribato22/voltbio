@@ -90,6 +90,46 @@ function generateHtml(config: ProfileConfig): string {
       </div>`;
       }
 
+      // Action button (WhatsApp template form)
+      if (link.type === "action" && link.actionConfig) {
+        const cfg = link.actionConfig;
+        const num = cfg.whatsappNumber.replace(/\D/g, "");
+        const fieldsHtml = cfg.fields.map((f) => {
+          const inputId = `action-${link.id}-${f.id}`;
+          if (f.type === "date") {
+            return `<div><label style="font-size:0.7rem;opacity:0.7;display:block;margin-bottom:2px">${escapeHtml(f.label)}</label><input type="date" id="${inputId}" data-label="${escapeHtml(f.label)}" style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:0.5rem;background:rgba(0,0,0,0.1);border:1px solid ${theme.colors.accent}40;color:${theme.colors.text}" /></div>`;
+          }
+          if (f.type === "select" && f.options?.length) {
+            const opts = f.options.map((o) => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
+            return `<div><label style="font-size:0.7rem;opacity:0.7;display:block;margin-bottom:2px">${escapeHtml(f.label)}</label><select id="${inputId}" data-label="${escapeHtml(f.label)}" style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:0.5rem;background:rgba(0,0,0,0.1);border:1px solid ${theme.colors.accent}40;color:${theme.colors.text}"><option value="">${escapeHtml(f.placeholder || "Select...")}</option>${opts}</select></div>`;
+          }
+          return `<div><label style="font-size:0.7rem;opacity:0.7;display:block;margin-bottom:2px">${escapeHtml(f.label)}</label><input type="text" id="${inputId}" data-label="${escapeHtml(f.label)}" placeholder="${escapeHtml(f.placeholder)}" style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:0.5rem;background:rgba(0,0,0,0.1);border:1px solid ${theme.colors.accent}40;color:${theme.colors.text}" /></div>`;
+        }).join("");
+
+        const fieldIds = cfg.fields.map((f) => `action-${link.id}-${f.id}`);
+        return `
+      <div class="action-card link-card scheduled-link"${schedAttrs} style="
+        background: ${isOutline ? "transparent" : theme.colors.cardBackground};
+        color: ${theme.colors.text};
+        border-radius: ${buttonRadius};
+        border: ${isOutline ? `1.5px solid ${theme.colors.accent}` : `1px solid ${theme.colors.cardBackground}`};
+        overflow: hidden;
+      ">
+        <button type="button" onclick="var f=this.parentElement.querySelector('.action-form');f.style.display=f.style.display==='none'?'block':'none';this.querySelector('.chevron').style.transform=f.style.display==='none'?'':'rotate(180deg)'" style="display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.875rem 1.25rem;font-size:0.875rem;font-weight:500;cursor:pointer;background:none;border:none;color:inherit;text-align:left">
+          <svg class="link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          <span class="link-title" style="flex:1">${escapeHtml(link.title)}</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="action-form" style="display:none;padding:0 1.25rem 1rem;display:flex;flex-direction:column;gap:0.75rem;display:none">
+          ${fieldsHtml}
+          <button type="button" onclick="(function(btn){var t='${escapeHtml(cfg.messageTemplate).replace(/'/g, "\\'")}';var ids=${JSON.stringify(fieldIds)};ids.forEach(function(id){var el=document.getElementById(id);if(el){var lbl=el.dataset.label;t=t.split('{'+lbl+'}').join(el.value).split('{'+lbl.toLowerCase()+'}').join(el.value)}});window.open('https://wa.me/${num}?text='+encodeURIComponent(t),'_blank')})(this)" style="width:100%;padding:0.625rem;border-radius:0.5rem;font-size:0.875rem;font-weight:600;color:white;background:${theme.colors.accent};border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+            Send via WhatsApp
+          </button>
+        </div>
+      </div>`;
+      }
+
       // Locked link button
       if (link.isLocked && link.encryptedUrl) {
         return `

@@ -38,9 +38,14 @@ import {
   FolderOpen,
   Lock,
   Unlock,
+  MessageCircle,
+  Zap,
+  Plus as PlusIcon,
+  Trash2 as Trash2Icon,
 } from "lucide-react";
-import type { LinkItem } from "@/types";
+import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
+import { nanoid } from "nanoid";
 
 /* ─────────────────────────────────────────────
    Password Input for Link Locking
@@ -162,6 +167,8 @@ function SortableLinkItem({
         {/* Icon */}
         {link.type === "header" ? (
           <FolderOpen className="w-4 h-4 text-[var(--lf-accent)]" />
+        ) : link.type === "action" ? (
+          <Zap className="w-4 h-4 text-[var(--lf-accent)]" />
         ) : (
           <SocialIcon iconKey={iconKey} size={16} className="text-[var(--lf-accent)]" />
         )}
@@ -169,9 +176,14 @@ function SortableLinkItem({
         {/* Title & URL */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--lf-text)] truncate">
-            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.title || "Untitled"}
+            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.type === "action" ? `⚡ ${link.title || "Action"}` : link.title || "Untitled"}
           </p>
-          {link.type !== "header" && (
+          {link.type === "action" && link.actionConfig?.whatsappNumber && (
+            <p className="text-xs text-[var(--lf-muted)] truncate">
+              WA: {link.actionConfig.whatsappNumber}
+            </p>
+          )}
+          {link.type !== "header" && link.type !== "action" && (
             <p className="text-xs text-[var(--lf-muted)] truncate">
               {link.url || "https://"}
             </p>
@@ -212,8 +224,8 @@ function SortableLinkItem({
             maxLength={100}
           />
 
-          {/* ── Link-only fields (hide for section headers) ── */}
-          {link.type !== "header" && (
+          {/* ── Link-only fields (hide for section headers and actions) ── */}
+          {link.type !== "header" && link.type !== "action" && (
             <>
               <Input
                 label="URL"
@@ -362,6 +374,117 @@ function SortableLinkItem({
             </>
           )}
 
+          {/* ── Action Config Form ── */}
+          {link.type === "action" && link.actionConfig && (
+            <div className="space-y-3">
+              {/* WhatsApp Number */}
+              <Input
+                label="WhatsApp Number"
+                value={link.actionConfig.whatsappNumber}
+                onChange={(e) =>
+                  onUpdate(link.id, {
+                    actionConfig: { ...link.actionConfig!, whatsappNumber: e.target.value },
+                  })
+                }
+                placeholder="628123456789"
+              />
+
+              {/* Message Template */}
+              <div>
+                <label className="text-xs font-medium text-[var(--lf-text)] mb-1 block">
+                  Message Template
+                </label>
+                <textarea
+                  value={link.actionConfig.messageTemplate}
+                  onChange={(e) =>
+                    onUpdate(link.id, {
+                      actionConfig: { ...link.actionConfig!, messageTemplate: e.target.value },
+                    })
+                  }
+                  placeholder={"Halo, saya {nama}.\nBooking: {layanan}\nTanggal: {tanggal}"}
+                  rows={3}
+                  maxLength={2000}
+                  className="w-full text-xs px-3 py-2 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)] font-mono resize-none"
+                />
+                <p className="text-[10px] text-[var(--lf-muted)] mt-1">
+                  Use {"{field_label}"} to insert visitor input. e.g. {"{nama}"}, {"{layanan}"}
+                </p>
+              </div>
+
+              {/* Form Fields */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-medium text-[var(--lf-text)]">
+                    Form Fields ({link.actionConfig.fields.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newField: ActionField = {
+                        id: nanoid(6),
+                        label: "",
+                        placeholder: "",
+                        type: "text",
+                      };
+                      onUpdate(link.id, {
+                        actionConfig: {
+                          ...link.actionConfig!,
+                          fields: [...link.actionConfig!.fields, newField],
+                        },
+                      });
+                    }}
+                    className="text-[10px] text-[var(--lf-accent)] hover:underline cursor-pointer flex items-center gap-0.5"
+                  >
+                    <PlusIcon className="w-3 h-3" /> Add Field
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {link.actionConfig.fields.map((field, fi) => (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-1.5 p-2 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]"
+                    >
+                      <input
+                        type="text"
+                        value={field.label}
+                        onChange={(e) => {
+                          const fields = [...link.actionConfig!.fields];
+                          fields[fi] = { ...fields[fi], label: e.target.value };
+                          onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                        }}
+                        placeholder="Label"
+                        className="flex-1 text-xs px-2 py-1 rounded bg-transparent text-[var(--lf-text)] focus:outline-none"
+                      />
+                      <select
+                        value={field.type}
+                        onChange={(e) => {
+                          const fields = [...link.actionConfig!.fields];
+                          fields[fi] = { ...fields[fi], type: e.target.value as ActionField["type"] };
+                          onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                        }}
+                        className="text-[10px] px-1.5 py-1 rounded bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] cursor-pointer"
+                      >
+                        <option value="text">Text</option>
+                        <option value="date">Date</option>
+                        <option value="select">Select</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fields = link.actionConfig!.fields.filter((_, i) => i !== fi);
+                          onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                        }}
+                        className="p-1 text-[var(--lf-muted)] hover:text-red-400 cursor-pointer"
+                      >
+                        <Trash2Icon className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <Button
             variant="danger"
             size="sm"
@@ -385,6 +508,7 @@ export function LinkEditor() {
   const links = useStore((s) => s.config.links);
   const addLink = useStore((s) => s.addLink);
   const addSection = useStore((s) => s.addSection);
+  const addAction = useStore((s) => s.addAction);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -429,6 +553,10 @@ export function LinkEditor() {
           <Button size="sm" variant="secondary" onClick={() => addSection()}>
             <FolderOpen className="w-3.5 h-3.5" />
             Section
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => addAction()}>
+            <Zap className="w-3.5 h-3.5" />
+            Action
           </Button>
           <Button size="sm" onClick={() => addLink()}>
             <Plus className="w-3.5 h-3.5" />

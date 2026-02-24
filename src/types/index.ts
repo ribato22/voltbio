@@ -2,6 +2,22 @@
    VoltBio — Core Type Definitions
    ============================================================ */
 
+/** Field definition for Smart Action Buttons */
+export interface ActionField {
+  id: string;
+  label: string;
+  placeholder: string;
+  type: "text" | "date" | "select";
+  options?: string[];  // for "select" type
+}
+
+/** Configuration for WhatsApp template action */
+export interface ActionConfig {
+  whatsappNumber: string;
+  messageTemplate: string;  // e.g. "Halo, saya {nama}. Booking: {layanan} tgl {tanggal}"
+  fields: ActionField[];
+}
+
 /** Individual link item in the user's bio page */
 export interface LinkItem {
   id: string;
@@ -11,14 +27,16 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
-  /** 'link' = clickable URL, 'header' = section divider/group label */
-  type?: "link" | "header";
+  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button */
+  type?: "link" | "header" | "action";
   isEmbed?: boolean;
   validFrom?: string;
   validUntil?: string;
   /** Password-protected link fields */
   isLocked?: boolean;
   encryptedUrl?: string;
+  /** Smart Action Button config (WhatsApp template) */
+  actionConfig?: ActionConfig;
 }
 
 /** User profile information */

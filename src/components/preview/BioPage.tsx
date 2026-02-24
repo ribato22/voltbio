@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Sparkles, UserPlus, Lock } from "lucide-react";
+import { MapPin, Sparkles, UserPlus, Lock, MessageCircle, ChevronDown } from "lucide-react";
+import { useState as useReactState } from "react";
 import { useStore } from "@/lib/store";
 import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
@@ -9,6 +10,112 @@ import { detectSocialIcon, sanitizeUrl, getAvatarFallback, cn } from "@/lib/util
 import { downloadVCard } from "@/lib/vcard";
 import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
 import { decryptUrl } from "@/lib/crypto";
+import type { LinkItem, ThemeConfig } from "@/types";
+
+/* ─────────────────────────────────────────────
+   Action Card Component (WhatsApp Template Form)
+   ───────────────────────────────────────────── */
+
+function ActionCard({ link, theme, buttonRadius, isOutline }: {
+  link: LinkItem;
+  theme: ThemeConfig;
+  buttonRadius: string;
+  isOutline: boolean;
+}) {
+  const [open, setOpen] = useReactState(false);
+  const [values, setValues] = useReactState<Record<string, string>>({});
+  const cfg = link.actionConfig!;
+
+  const handleSend = () => {
+    let msg = cfg.messageTemplate;
+    cfg.fields.forEach((f) => {
+      const val = values[f.id] || "";
+      msg = msg.replaceAll(`{${f.label}}`, val).replaceAll(`{${f.label.toLowerCase()}}`, val);
+    });
+    const num = cfg.whatsappNumber.replace(/\D/g, "");
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 20 } },
+      }}
+      className="action-card link-card w-full overflow-hidden"
+      style={{
+        background: isOutline ? "transparent" : theme.colors.cardBackground,
+        color: theme.colors.text,
+        borderRadius: buttonRadius,
+        border: isOutline ? `1.5px solid ${theme.colors.accent}` : `1px solid ${theme.colors.cardBackground}`,
+      }}
+    >
+      {/* Header Button */}
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center gap-3 w-full px-5 py-3.5 text-sm font-medium cursor-pointer"
+      >
+        <MessageCircle className="w-4 h-4 link-icon" style={{ color: theme.colors.accent }} />
+        <span className="link-title flex-1 text-left">{link.title}</span>
+        <ChevronDown
+          className="w-4 h-4 transition-transform duration-200"
+          style={{ color: theme.colors.accent, transform: open ? "rotate(180deg)" : "rotate(0)" }}
+        />
+      </button>
+
+      {/* Expandable Form */}
+      {open && (
+        <div className="px-5 pb-4 space-y-3">
+          {cfg.fields.map((field) => (
+            <div key={field.id}>
+              <label className="text-[11px] font-medium opacity-70 mb-1 block">{field.label}</label>
+              {field.type === "date" ? (
+                <input
+                  type="date"
+                  value={values[field.id] || ""}
+                  onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
+                  className="w-full text-sm px-3 py-2 rounded-lg bg-black/10 border border-white/10 focus:outline-none focus:ring-1"
+                  style={{ color: theme.colors.text, borderColor: theme.colors.accent + "40" }}
+                />
+              ) : field.type === "select" && field.options?.length ? (
+                <select
+                  value={values[field.id] || ""}
+                  onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
+                  className="w-full text-sm px-3 py-2 rounded-lg bg-black/10 border border-white/10 focus:outline-none focus:ring-1 cursor-pointer"
+                  style={{ color: theme.colors.text, borderColor: theme.colors.accent + "40" }}
+                >
+                  <option value="">{field.placeholder || "Select..."}</option>
+                  {field.options.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={values[field.id] || ""}
+                  onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
+                  placeholder={field.placeholder}
+                  className="w-full text-sm px-3 py-2 rounded-lg bg-black/10 border border-white/10 focus:outline-none focus:ring-1"
+                  style={{ color: theme.colors.text, borderColor: theme.colors.accent + "40" }}
+                />
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleSend}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-90"
+            style={{ background: theme.colors.accent }}
+          >
+            <MessageCircle className="w-4 h-4" />
+            Send via WhatsApp
+          </button>
+        </div>
+      )}
+    </motion.div>
+  );
+}
 
 /* ─────────────────────────────────────────────
    Stagger Animation Variants
@@ -254,6 +361,11 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                   />
                 </motion.div>
               );
+            }
+
+            // ── Render Action Card ──
+            if (link.type === "action" && link.actionConfig) {
+              return <ActionCard key={link.id} link={link} theme={theme} buttonRadius={buttonRadius} isOutline={isOutline} />;
             }
 
             // ── Render Locked Link Button ──

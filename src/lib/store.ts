@@ -68,6 +68,7 @@ interface VoltBioStore {
   // Link actions
   addLink: (link?: Partial<LinkItem>) => void;
   addSection: (title?: string) => void;
+  addAction: (title?: string) => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -146,6 +147,34 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, section],
+            },
+          };
+        }),
+
+      addAction: (title?: string) =>
+        set((state) => {
+          const action: LinkItem = {
+            id: nanoid(10),
+            title: title ?? "Book Consultation",
+            url: "",
+            icon: "message-circle",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_blank",
+            type: "action",
+            actionConfig: {
+              whatsappNumber: "",
+              messageTemplate: "Halo, saya {nama}.\nSaya ingin booking {layanan}.\nTerima kasih!",
+              fields: [
+                { id: nanoid(6), label: "Nama", placeholder: "Nama lengkap", type: "text" },
+                { id: nanoid(6), label: "Layanan", placeholder: "Pilih layanan", type: "text" },
+              ],
+            },
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, action],
             },
           };
         }),
