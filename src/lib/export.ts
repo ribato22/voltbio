@@ -147,6 +147,46 @@ function generateHtml(config: ProfileConfig): string {
       ${lightboxHtml}`;
       }
 
+      // Lead Form / Contact Form Block
+      if (link.type === "lead-form") {
+        const fields = link.formFields || ["name", "email", "message"];
+        const provider = link.formProvider || "formsubmit";
+        const actionUrl =
+          provider === "formsubmit"
+            ? `https://formsubmit.co/${escapeHtml(link.formEmail || "")}`
+            : "https://api.web3forms.com/submit";
+
+        const inputCss = `width:100%;padding:0.625rem 0.75rem;border-radius:0.5rem;border:1px solid ${theme.colors.accent}30;background:${theme.colors.accent}08;color:${theme.colors.text};font-size:0.875rem;font-family:inherit;outline:none;box-sizing:border-box`;
+
+        const fieldHtml = fields.map((f) => {
+          if (f === "name") return `<input type="text" name="name" placeholder="Your Name" required style="${inputCss}" />`;
+          if (f === "email") return `<input type="email" name="email" placeholder="Your Email" required style="${inputCss}" />`;
+          if (f === "phone") return `<input type="tel" name="phone" placeholder="Phone Number" style="${inputCss}" />`;
+          if (f === "message") return `<textarea name="message" placeholder="Your Message..." rows="3" required style="${inputCss};resize:vertical"></textarea>`;
+          return "";
+        }).join("\n          ");
+
+        const hiddenFields = provider === "formsubmit"
+          ? `<input type="hidden" name="_captcha" value="false" />\n          <input type="hidden" name="_subject" value="New message from ${escapeHtml(link.title || "VoltBio")}" />`
+          : `<input type="hidden" name="access_key" value="${escapeHtml(link.formAccessKey || "")}" />`;
+
+        return `
+      <div style="width:100%">
+        <div style="position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem;background:linear-gradient(135deg,${theme.colors.accent}15,${theme.colors.accent}05);border:1.5px solid ${theme.colors.accent}30">
+          <div style="text-align:center;margin-bottom:1rem">
+            <div style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.625rem;font-weight:700;margin-bottom:0.5rem;background:${theme.colors.accent}20;color:${theme.colors.accent}">✉️ Contact Form</div>
+            <p style="font-size:1rem;font-weight:700;color:${theme.colors.text}">${escapeHtml(link.title || "Contact Me")}</p>
+          </div>
+          <form action="${actionUrl}" method="POST" style="display:flex;flex-direction:column;gap:0.75rem">
+            ${hiddenFields}
+            ${fieldHtml}
+            <button type="submit" style="width:100%;padding:0.625rem;border-radius:9999px;font-size:0.875rem;font-weight:600;color:#fff;background:${theme.colors.accent};border:none;cursor:pointer">${escapeHtml(link.formCta || "Send Message ✉️")}</button>
+          </form>
+          <p style="font-size:0.5625rem;text-align:center;margin-top:0.75rem;opacity:0.4;color:${theme.colors.text}">Powered by ${provider === "formsubmit" ? "FormSubmit.co" : "Web3Forms"} · No backend needed</p>
+        </div>
+      </div>`;
+      }
+
       const safeUrl = sanitizeUrl(link.url);
       const iconKey = detectSocialIcon(link.url);
       const rel = link.target === "_blank" ? ' rel="noopener noreferrer"' : "";

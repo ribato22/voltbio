@@ -73,6 +73,7 @@ interface VoltBioStore {
   addAction: (title?: string) => void;
   addDonation: () => void;
   addPortfolio: () => void;
+  addLeadForm: () => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -235,6 +236,31 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, portfolio],
+            },
+          };
+        }),
+
+      addLeadForm: () =>
+        set((state) => {
+          const form: LinkItem = {
+            id: nanoid(10),
+            title: "Contact Me",
+            url: "",
+            icon: "mail",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_self",
+            type: "lead-form",
+            formProvider: "formsubmit",
+            formEmail: "",
+            formFields: ["name", "email", "message"],
+            formCta: "Send Message ✉️",
+            formSuccessMsg: "Thank you! Your message has been sent.",
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, form],
             },
           };
         }),

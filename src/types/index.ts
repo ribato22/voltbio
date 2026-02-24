@@ -42,8 +42,8 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
-  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid */
-  type?: "link" | "header" | "action" | "donation" | "portfolio";
+  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid, 'lead-form' = contact form */
+  type?: "link" | "header" | "action" | "donation" | "portfolio" | "lead-form";
   isEmbed?: boolean;
   /** Display as inline PDF viewer */
   isPdfEmbed?: boolean;
@@ -62,6 +62,13 @@ export interface LinkItem {
   portfolioImages?: PortfolioImage[];
   portfolioColumns?: 2 | 3 | 4;
   portfolioGap?: "sm" | "md" | "lg";
+  /** Lead Form fields */
+  formProvider?: "formsubmit" | "web3forms";
+  formEmail?: string;        // Recipient email for formsubmit.co
+  formAccessKey?: string;    // Access key for web3forms.com
+  formFields?: ("name" | "email" | "phone" | "message")[];
+  formCta?: string;          // Submit button text
+  formSuccessMsg?: string;   // Thank-you message after submit
 }
 
 /** A single image in a portfolio grid block */

@@ -47,6 +47,7 @@ import {
   Coffee,
   Upload,
   Image,
+  Mail,
 } from "lucide-react";
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
@@ -717,6 +718,110 @@ function SortableLinkItem({
             </div>
           )}
 
+          {/* ── Lead Form Config ── */}
+          {link.type === "lead-form" && (
+            <div className="space-y-3 p-3 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+              <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" />
+                Lead Form Settings
+              </p>
+
+              {/* Provider selector */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Form Provider
+                </label>
+                <div className="flex gap-1.5">
+                  {(["formsubmit", "web3forms"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => onUpdate(link.id, { formProvider: p })}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border",
+                        (link.formProvider || "formsubmit") === p
+                          ? "bg-[var(--lf-accent)] text-white border-transparent"
+                          : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                      )}
+                    >
+                      {p === "formsubmit" ? "FormSubmit.co" : "Web3Forms"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Email / Access Key */}
+              {(link.formProvider || "formsubmit") === "formsubmit" ? (
+                <Input
+                  label="Your Email (recipient)"
+                  value={link.formEmail || ""}
+                  onChange={(e) => onUpdate(link.id, { formEmail: e.target.value })}
+                  placeholder="your@email.com"
+                />
+              ) : (
+                <Input
+                  label="Web3Forms Access Key"
+                  value={link.formAccessKey || ""}
+                  onChange={(e) => onUpdate(link.id, { formAccessKey: e.target.value })}
+                  placeholder="paste-your-access-key-here"
+                />
+              )}
+
+              {/* Fields toggles */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1.5 block">
+                  Form Fields
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(["name", "email", "phone", "message"] as const).map((field) => {
+                    const active = (link.formFields || []).includes(field);
+                    return (
+                      <button
+                        key={field}
+                        type="button"
+                        onClick={() => {
+                          const current = link.formFields || [];
+                          const next = active
+                            ? current.filter((f) => f !== field)
+                            : [...current, field];
+                          onUpdate(link.id, { formFields: next });
+                        }}
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border capitalize",
+                          active
+                            ? "bg-[var(--lf-accent)] text-white border-transparent"
+                            : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                        )}
+                      >
+                        {field}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* CTA + Success Message */}
+              <Input
+                label="Submit Button Text"
+                value={link.formCta || ""}
+                onChange={(e) => onUpdate(link.id, { formCta: e.target.value })}
+                placeholder="Send Message ✉️"
+              />
+              <Input
+                label="Success Message"
+                value={link.formSuccessMsg || ""}
+                onChange={(e) => onUpdate(link.id, { formSuccessMsg: e.target.value })}
+                placeholder="Thank you! Your message has been sent."
+              />
+
+              <p className="text-[9px] text-[var(--lf-muted)]">
+                {(link.formProvider || "formsubmit") === "formsubmit"
+                  ? "⚡ FormSubmit.co — Free, no signup. First email must confirm activation."
+                  : "⚡ Web3Forms — Free 250 submissions/month. Get key at web3forms.com"}
+              </p>
+            </div>
+          )}
+
           <Button
             variant="danger"
             size="sm"
@@ -724,7 +829,7 @@ function SortableLinkItem({
             className="w-full"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : "Delete Link"}
+            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : link.type === "lead-form" ? "Delete Form" : "Delete Link"}
           </Button>
         </div>
       )}
@@ -743,6 +848,7 @@ export function LinkEditor() {
   const addAction = useStore((s) => s.addAction);
   const addDonation = useStore((s) => s.addDonation);
   const addPortfolio = useStore((s) => s.addPortfolio);
+  const addLeadForm = useStore((s) => s.addLeadForm);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -799,6 +905,10 @@ export function LinkEditor() {
           <Button size="sm" variant="secondary" onClick={() => addPortfolio()}>
             <Image className="w-3.5 h-3.5" />
             Portfolio
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => addLeadForm()}>
+            <Mail className="w-3.5 h-3.5" />
+            Lead Form
           </Button>
           <Button size="sm" onClick={() => addLink()}>
             <Plus className="w-3.5 h-3.5" />

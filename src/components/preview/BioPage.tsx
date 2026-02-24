@@ -511,6 +511,129 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
               );
             }
 
+            // ── Lead Form / Contact Form Block ──
+            if (link.type === "lead-form") {
+              const fields = link.formFields || ["name", "email", "message"];
+              const provider = link.formProvider || "formsubmit";
+              const actionUrl =
+                provider === "formsubmit"
+                  ? `https://formsubmit.co/${link.formEmail || ""}`
+                  : "https://api.web3forms.com/submit";
+
+              const inputStyle: React.CSSProperties = {
+                width: "100%",
+                padding: "0.625rem 0.75rem",
+                borderRadius: "0.5rem",
+                border: `1px solid ${theme.colors.accent}30`,
+                background: `${theme.colors.accent}08`,
+                color: theme.colors.text,
+                fontSize: "0.875rem",
+                outline: "none",
+              };
+
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="lead-form-block w-full"
+                >
+                  <div
+                    className="relative overflow-hidden rounded-2xl p-5"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.colors.accent}15, ${theme.colors.accent}05)`,
+                      border: `1.5px solid ${theme.colors.accent}30`,
+                    }}
+                  >
+                    {/* Header */}
+                    <div className="text-center mb-4">
+                      <div
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold mb-2"
+                        style={{ background: `${theme.colors.accent}20`, color: theme.colors.accent }}
+                      >
+                        ✉️ Contact Form
+                      </div>
+                      <p className="text-base font-bold" style={{ color: theme.colors.text }}>
+                        {link.title || "Contact Me"}
+                      </p>
+                    </div>
+
+                    {/* Form */}
+                    <form
+                      action={actionUrl}
+                      method="POST"
+                      className="space-y-3"
+                      onSubmit={(e) => {
+                        // In preview (embedded mode), prevent actual submission
+                        if (embedded) {
+                          e.preventDefault();
+                          alert(link.formSuccessMsg || "Thank you! Your message has been sent.");
+                        }
+                      }}
+                    >
+                      {/* Hidden fields */}
+                      {provider === "formsubmit" && (
+                        <>
+                          <input type="hidden" name="_captcha" value="false" />
+                          <input type="hidden" name="_subject" value={`New message from ${link.title || "VoltBio"}`} />
+                        </>
+                      )}
+                      {provider === "web3forms" && (
+                        <input type="hidden" name="access_key" value={link.formAccessKey || ""} />
+                      )}
+
+                      {fields.includes("name") && (
+                        <input
+                          type="text"
+                          name="name"
+                          placeholder="Your Name"
+                          required
+                          style={inputStyle}
+                        />
+                      )}
+                      {fields.includes("email") && (
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="Your Email"
+                          required
+                          style={inputStyle}
+                        />
+                      )}
+                      {fields.includes("phone") && (
+                        <input
+                          type="tel"
+                          name="phone"
+                          placeholder="Phone Number"
+                          style={inputStyle}
+                        />
+                      )}
+                      {fields.includes("message") && (
+                        <textarea
+                          name="message"
+                          placeholder="Your Message..."
+                          rows={3}
+                          required
+                          style={{ ...inputStyle, resize: "vertical" as const }}
+                        />
+                      )}
+
+                      <button
+                        type="submit"
+                        className="w-full py-2.5 rounded-full text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                        style={{ background: theme.colors.accent }}
+                      >
+                        {link.formCta || "Send Message ✉️"}
+                      </button>
+                    </form>
+
+                    <p className="text-[9px] text-center mt-3 opacity-40" style={{ color: theme.colors.text }}>
+                      Powered by {provider === "formsubmit" ? "FormSubmit.co" : "Web3Forms"} · No backend needed
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            }
+
             const iconKey = detectSocialIcon(link.url);
             const safeUrl = sanitizeUrl(link.url);
             const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;
