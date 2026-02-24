@@ -9,10 +9,6 @@ import {
   Facebook,
   Youtube,
   Music,
-  MessageCircle,
-  Send,
-  Twitch,
-  Gamepad2,
   PenTool,
   BookOpen,
   Coffee,
@@ -24,13 +20,38 @@ import {
   Camera,
   Heart,
 } from "lucide-react";
+import {
+  WhatsAppIcon,
+  TikTokIcon,
+  SpotifyIcon,
+  DiscordIcon,
+  TelegramIcon,
+  RedditIcon,
+  PinterestIcon,
+  ThreadsIcon,
+  BlueskyIcon,
+} from "@/components/preview/BrandIcons";
 import { cn } from "@/lib/utils";
 
 /**
- * Map from detected icon key → Lucide React component.
- * Simple Icons SVGs are inlined for platforms without a Lucide equivalent.
+ * Map from detected icon key → React component.
+ *
+ * Key platforms use real brand SVGs from BrandIcons.tsx.
+ * Others use Lucide icons as a sensible fallback.
  */
 const iconMap: Record<string, React.ReactNode> = {
+  // ── Brand SVGs (recognizable silhouettes) ──
+  whatsapp: <WhatsAppIcon />,
+  tiktok: <TikTokIcon />,
+  spotify: <SpotifyIcon />,
+  discord: <DiscordIcon />,
+  telegram: <TelegramIcon />,
+  reddit: <RedditIcon />,
+  pinterest: <PinterestIcon />,
+  threads: <ThreadsIcon />,
+  bluesky: <BlueskyIcon />,
+
+  // ── Lucide icons (already recognizable) ──
   globe: <Globe />,
   github: <Github />,
   twitter: <Twitter />,
@@ -38,24 +59,17 @@ const iconMap: Record<string, React.ReactNode> = {
   linkedin: <Linkedin />,
   facebook: <Facebook />,
   youtube: <Youtube />,
-  spotify: <Music />,
-  discord: <MessageCircle />,
-  telegram: <Send />,
-  whatsapp: <MessageCircle />,
-  twitch: <Twitch />,
-  tiktok: <Music />,
+
+  // ── Lucide fallbacks for niche platforms ──
+  twitch: <Music />,
   medium: <BookOpen />,
   dev: <Code />,
   dribbble: <PenTool />,
   behance: <PenTool />,
   figma: <PenTool />,
   notion: <BookOpen />,
-  reddit: <Gamepad2 />,
-  pinterest: <Camera />,
   snapchat: <Camera />,
-  threads: <MessageCircle />,
-  mastodon: <MessageCircle />,
-  bluesky: <MessageCircle />,
+  mastodon: <Globe />,
   codepen: <Code />,
   stackoverflow: <Code />,
   producthunt: <ExternalLink />,
