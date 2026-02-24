@@ -7,7 +7,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
-import type { ProfileConfig, LinkItem, ThemeConfig, Profile, SeoConfig, AppSettings, EditorPanel, Testimonial, HubTab } from "@/types";
+import type { ProfileConfig, LinkItem, ThemeConfig, Profile, SeoConfig, AppSettings, EditorPanel, Testimonial, HubTab, FloatingButton } from "@/types";
 import { themePresets } from "@/lib/themes";
 
 const defaultConfig: ProfileConfig = {
@@ -89,6 +89,7 @@ interface VoltBioStore {
 
   // Settings actions
   updateSettings: (settings: Partial<AppSettings>) => void;
+  updateFloatingButton: (fb: Partial<FloatingButton>) => void;
 
   // Testimonial actions
   addTestimonial: () => void;
@@ -373,6 +374,14 @@ export const useStore = create<VoltBioStore>()(
           config: {
             ...state.config,
             settings: { ...state.config.settings, ...settings },
+          },
+        })),
+
+      updateFloatingButton: (fb) =>
+        set((state) => ({
+          config: {
+            ...state.config,
+            floatingButton: { ...(state.config.floatingButton || { enabled: false, icon: "whatsapp", url: "" }), ...fb },
           },
         })),
 

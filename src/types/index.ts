@@ -135,6 +135,14 @@ export interface AppSettings {
   customCSS?: string;
 }
 
+/** Floating Action Button config */
+export interface FloatingButton {
+  enabled: boolean;
+  icon: "whatsapp" | "email" | "phone" | "link";
+  url: string;     // tel:, mailto:, https://wa.me/..., or custom URL
+  label?: string;  // Tooltip/label like "Chat with us"
+}
+
 /** Complete profile configuration (top-level JSON structure) */
 export interface ProfileConfig {
   version: string;
@@ -145,6 +153,7 @@ export interface ProfileConfig {
   theme: ThemeConfig;
   seo: SeoConfig;
   settings: AppSettings;
+  floatingButton?: FloatingButton;
 }
 
 /** Named theme preset */

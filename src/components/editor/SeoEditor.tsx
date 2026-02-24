@@ -98,6 +98,8 @@ export function SeoEditor() {
   const settings = useStore((s) => s.config.settings);
   const updateSeo = useStore((s) => s.updateSeo);
   const updateSettings = useStore((s) => s.updateSettings);
+  const fab = useStore((s) => s.config.floatingButton) || { enabled: false, icon: "whatsapp" as const, url: "", label: "" };
+  const updateFab = useStore((s) => s.updateFloatingButton);
 
   const previewUrl = `${profile.username}.voltbio.app`;
 
@@ -206,6 +208,74 @@ export function SeoEditor() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* ── Floating Action Button ── */}
+        <div className="space-y-3 p-3.5 rounded-xl bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+              <MessageCircle className="w-3.5 h-3.5" />
+              Floating Contact Button
+            </p>
+            <Toggle
+              checked={fab.enabled}
+              onCheckedChange={(v) => updateFab({ enabled: v })}
+              id="fab-toggle"
+            />
+          </div>
+
+          {fab.enabled && (
+            <div className="space-y-3 pt-1">
+              {/* Icon type */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Button Type
+                </label>
+                <div className="flex gap-1.5">
+                  {([
+                    { key: "whatsapp", label: "💬 WhatsApp" },
+                    { key: "email", label: "✉️ Email" },
+                    { key: "phone", label: "📞 Phone" },
+                    { key: "link", label: "🔗 Link" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => updateFab({ icon: opt.key })}
+                      className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-medium transition-all cursor-pointer border ${
+                        fab.icon === opt.key
+                          ? "bg-[var(--lf-accent)] text-white border-transparent"
+                          : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* URL / contact */}
+              <Input
+                label={fab.icon === "whatsapp" ? "WhatsApp Number" : fab.icon === "email" ? "Email Address" : fab.icon === "phone" ? "Phone Number" : "URL"}
+                value={fab.url}
+                onChange={(e) => updateFab({ url: e.target.value })}
+                placeholder={
+                  fab.icon === "whatsapp" ? "628123456789"
+                    : fab.icon === "email" ? "hello@example.com"
+                    : fab.icon === "phone" ? "+628123456789"
+                    : "https://example.com"
+                }
+              />
+
+              {/* Label */}
+              <Input
+                label="Tooltip Label"
+                value={fab.label || ""}
+                onChange={(e) => updateFab({ label: e.target.value })}
+                placeholder="Chat with us!"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
