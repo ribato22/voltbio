@@ -223,7 +223,7 @@ function generateHtml(config: ProfileConfig): string {
         }).join("\n          ");
 
         const hiddenFields = provider === "formsubmit"
-          ? `<input type="hidden" name="_captcha" value="false" />\n          <input type="hidden" name="_subject" value="New message from ${escapeHtml(link.title || "VoltBio")}" />`
+          ? `<input type="hidden" name="_captcha" value="false" />\n          <input type="hidden" name="_subject" value="New message from ${escapeHtml(link.title || "VoltBio")}" />\n          <input type="hidden" name="_next" value="" />\n          <script>document.querySelector('input[name=&quot;_next&quot;]').value=window.location.href;</script>`
           : `<input type="hidden" name="access_key" value="${escapeHtml(link.formAccessKey || "")}" />`;
 
         return `

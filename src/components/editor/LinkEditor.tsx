@@ -213,6 +213,14 @@ function SortableLinkItem({
           <FolderOpen className="w-4 h-4 text-[var(--lf-accent)]" />
         ) : link.type === "action" ? (
           <Zap className="w-4 h-4 text-[var(--lf-accent)]" />
+        ) : link.type === "countdown" ? (
+          <Timer className="w-4 h-4 text-[var(--lf-accent)]" />
+        ) : link.type === "donation" ? (
+          <span className="text-base">☕</span>
+        ) : link.type === "portfolio" ? (
+          <Image className="w-4 h-4 text-[var(--lf-accent)]" />
+        ) : link.type === "lead-form" ? (
+          <Mail className="w-4 h-4 text-[var(--lf-accent)]" />
         ) : (
           <SocialIcon iconKey={iconKey} size={16} className="text-[var(--lf-accent)]" />
         )}
@@ -220,14 +228,14 @@ function SortableLinkItem({
         {/* Title & URL */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--lf-text)] truncate">
-            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.type === "action" ? `⚡ ${link.title || "Action"}` : link.title || "Untitled"}
+            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.type === "action" ? `⚡ ${link.title || "Action"}` : link.type === "countdown" ? `⏰ ${link.title || "Countdown"}` : link.type === "donation" ? `☕ ${link.title || "Donation"}` : link.type === "portfolio" ? `🖼️ ${link.title || "Portfolio"}` : link.type === "lead-form" ? `✉️ ${link.title || "Contact Form"}` : link.title || "Untitled"}
           </p>
           {link.type === "action" && link.actionConfig?.whatsappNumber && (
             <p className="text-xs text-[var(--lf-muted)] truncate">
               WA: {link.actionConfig.whatsappNumber}
             </p>
           )}
-          {link.type !== "header" && link.type !== "action" && (
+          {link.type !== "header" && link.type !== "action" && link.type !== "countdown" && link.type !== "donation" && link.type !== "portfolio" && link.type !== "lead-form" && (
             <p className="text-xs text-[var(--lf-muted)] truncate">
               {link.url || "https://"}
             </p>
