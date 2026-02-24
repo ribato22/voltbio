@@ -130,7 +130,7 @@ function generateHtml(config: ProfileConfig): string {
         border: ${isOutline ? `1.5px solid ${theme.colors.accent}` : `1px solid ${theme.colors.cardBackground}`};
         overflow: hidden;
       ">
-        <button type="button" onclick="var f=this.parentElement.querySelector('.action-form');f.style.display=f.style.display==='none'?'flex':'none';this.querySelector('.chevron').style.transform=f.style.display==='none'?'':'rotate(180deg)'" style="display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.875rem 1.25rem;font-size:0.875rem;font-weight:500;cursor:pointer;background:none;border:none;color:inherit;text-align:left">
+        <button type="button" onclick="var f=this.parentElement.querySelector('.action-form');f.style.display=f.style.display==='none'?'flex':'none';this.querySelector('.chevron').style.transform=f.style.display==='none'?'':'rotate(180deg)';this.parentElement.style.borderRadius=f.style.display==='none'?'${buttonRadius}':'1.25rem'" style="display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.875rem 1.25rem;font-size:0.875rem;font-weight:500;cursor:pointer;background:none;border:none;color:inherit;text-align:left">
           <svg class="link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
           <span class="link-title" style="flex:1">${escapeHtml(link.title)}</span>
           <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s"><path d="m6 9 6 6 6-6"/></svg>
@@ -259,7 +259,7 @@ function generateHtml(config: ProfileConfig): string {
   ${seo.ogImage ? `<meta name="twitter:image" content="${escapeHtml(seo.ogImage)}" />` : ""}
 
   <!-- CSP -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; frame-src 'self' https://www.youtube.com https://open.spotify.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; frame-src 'self' https: data: blob:;" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />

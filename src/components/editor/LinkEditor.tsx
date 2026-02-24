@@ -39,7 +39,7 @@ import {
   FolderOpen,
   Lock,
   Unlock,
-  MessageCircle,
+
   Zap,
   Plus as PlusIcon,
   Trash2 as Trash2Icon,
@@ -48,6 +48,32 @@ import {
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
 import { nanoid } from "nanoid";
+
+/* ─────────────────────────────────────────────
+   Select Options Input (local state + onBlur)
+   ───────────────────────────────────────────── */
+
+function SelectOptionsInput({ value, onChange }: { value: string[]; onChange: (opts: string[]) => void }) {
+  const [text, setText] = useState(value.join(", "));
+  return (
+    <div className="px-2 pb-2">
+      <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => {
+          const opts = text.split(",").map((s) => s.trim()).filter(Boolean);
+          onChange(opts);
+        }}
+        placeholder="Options (comma-separated): Konsultasi, Pemeriksaan"
+        className="w-full text-[10px] px-2 py-1.5 rounded bg-[var(--lf-border)]/30 border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+      />
+      <p className="text-[9px] text-[var(--lf-muted)] mt-0.5">
+        Separate options with commas
+      </p>
+    </div>
+  );
+}
 
 /* ─────────────────────────────────────────────
    Password Input for Link Locking
@@ -498,23 +524,14 @@ function SortableLinkItem({
                       </div>
                       {/* Select Options Input */}
                       {field.type === "select" && (
-                        <div className="px-2 pb-2">
-                          <input
-                            type="text"
-                            value={(field.options || []).join(", ")}
-                            onChange={(e) => {
-                              const fields = [...link.actionConfig!.fields];
-                              const opts = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-                              fields[fi] = { ...fields[fi], options: opts };
-                              onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
-                            }}
-                            placeholder="Options (comma-separated): Konsultasi, Pemeriksaan, Pemasangan Baru"
-                            className="w-full text-[10px] px-2 py-1.5 rounded bg-[var(--lf-border)]/30 border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
-                          />
-                          <p className="text-[9px] text-[var(--lf-muted)] mt-0.5">
-                            Separate options with commas
-                          </p>
-                        </div>
+                        <SelectOptionsInput
+                          value={field.options || []}
+                          onChange={(opts) => {
+                            const fields = [...link.actionConfig!.fields];
+                            fields[fi] = { ...fields[fi], options: opts };
+                            onUpdate(link.id, { actionConfig: { ...link.actionConfig!, fields } });
+                          }}
+                        />
                       )}
                     </div>
                   ))}

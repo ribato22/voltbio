@@ -46,8 +46,9 @@ function ActionCard({ link, theme, buttonRadius, isOutline }: {
       style={{
         background: isOutline ? "transparent" : theme.colors.cardBackground,
         color: theme.colors.text,
-        borderRadius: buttonRadius,
+        borderRadius: open ? "1.25rem" : buttonRadius,
         border: isOutline ? `1.5px solid ${theme.colors.accent}` : `1px solid ${theme.colors.cardBackground}`,
+        transition: "border-radius 0.2s ease",
       }}
     >
       {/* Header Button */}
