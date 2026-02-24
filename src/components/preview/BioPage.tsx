@@ -346,10 +346,8 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
             if (!activeTab || !(pages || []).length) return true;
             const activePage = (pages || []).find((p) => p.id === activeTab);
             if (!activePage) return true;
-            // Show link if it's in the active tab's linkIds, or if not assigned to any tab
-            if (activePage.linkIds.includes(link.id)) return true;
-            const assignedAnywhere = (pages || []).some((p) => p.linkIds.includes(link.id));
-            return !assignedAnywhere;
+            // Strict: only show links explicitly assigned to this tab
+            return activePage.linkIds.includes(link.id);
           }).map((link) => {
             // ── Section Header ──
             if (link.type === "header") {

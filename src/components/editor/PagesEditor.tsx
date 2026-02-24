@@ -108,7 +108,7 @@ export function PagesEditor() {
 
       {pages.length > 0 && (
         <p className="text-[10px] text-[var(--lf-muted)] text-center">
-          💡 Links not assigned to any tab will show on all tabs.
+          💡 Links not assigned to any tab only appear under &quot;All&quot;.
         </p>
       )}
     </div>
