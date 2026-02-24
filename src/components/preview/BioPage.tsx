@@ -10,6 +10,7 @@ import { detectSocialIcon, sanitizeUrl, getAvatarFallback, cn, detectPdfUrl } fr
 import { downloadVCard } from "@/lib/vcard";
 import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
 import { decryptUrl } from "@/lib/crypto";
+import { getCardEffectStyles } from "@/lib/theme-effects";
 import type { LinkItem, ThemeConfig } from "@/types";
 
 /* ─────────────────────────────────────────────
@@ -375,7 +376,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
             if (link.type === "donation") {
               const platformLabels: Record<string, string> = {
                 qris: "📱 QRIS", saweria: "🪙 Saweria", trakteer: "☕ Trakteer",
-                kofi: "☕ Ko-fi", patreon: "🎨 Patreon",
+                kofi: "☕ Ko-fi", buymeacoffee: "☕ Buy Me a Coffee", patreon: "🎨 Patreon",
               };
               const platformLabel = platformLabels[link.donationPlatform || "qris"];
               const isQris = link.donationPlatform === "qris";
@@ -587,6 +588,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                   border: isOutline
                     ? `1.5px solid ${theme.colors.accent}`
                     : `1px solid ${theme.colors.cardBackground}`,
+                  ...getCardEffectStyles(theme.themeEffect, theme.colors.accent),
                 }}
                 whileHover={{
                   scale: 1.03,

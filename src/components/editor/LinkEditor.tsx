@@ -57,6 +57,7 @@ const DONATION_PLATFORMS = [
   { value: "saweria", label: "Saweria", icon: "🪙" },
   { value: "trakteer", label: "Trakteer", icon: "☕" },
   { value: "kofi", label: "Ko-fi", icon: "☕" },
+  { value: "buymeacoffee", label: "BMC", icon: "☕" },
   { value: "patreon", label: "Patreon", icon: "🎨" },
 ] as const;
 
@@ -601,6 +602,7 @@ function SortableLinkItem({
                     link.donationPlatform === "saweria" ? "https://saweria.co/username" :
                     link.donationPlatform === "trakteer" ? "https://trakteer.id/username" :
                     link.donationPlatform === "kofi" ? "https://ko-fi.com/username" :
+                    link.donationPlatform === "buymeacoffee" ? "https://buymeacoffee.com/username" :
                     "https://patreon.com/username"
                   }
                 />

@@ -72,6 +72,25 @@ export const fontCatalog: FontOption[] = [
     category: "sans-serif",
     weights: [400, 500, 600, 700],
   },
+  // ── Advanced Theme Fonts ──
+  {
+    family: "Orbitron",
+    label: "Orbitron",
+    category: "display",
+    weights: [400, 500, 600, 700],
+  },
+  {
+    family: "Space Mono",
+    label: "Space Mono",
+    category: "monospace",
+    weights: [400, 700],
+  },
+  {
+    family: "Rajdhani",
+    label: "Rajdhani",
+    category: "display",
+    weights: [400, 500, 600, 700],
+  },
 ];
 
 /* ─────────────────────────────────────────────
@@ -133,6 +152,8 @@ export function getFontFallback(family: string): string {
       return `'${family}', Georgia, 'Times New Roman', serif`;
     case "monospace":
       return `'${family}', 'Fira Code', 'Courier New', monospace`;
+    case "display":
+      return `'${family}', 'Impact', system-ui, sans-serif`;
     default:
       return `'${family}', system-ui, -apple-system, sans-serif`;
   }

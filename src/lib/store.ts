@@ -275,6 +275,7 @@ export const useStore = create<VoltBioStore>()(
                 colors: { ...preset.colors },
                 font: preset.font,
                 buttonStyle: preset.buttonStyle,
+                themeEffect: preset.themeEffect || "none",
               },
             },
           };

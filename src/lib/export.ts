@@ -10,6 +10,7 @@ import { buildGoogleFontsUrl, getFontFallback } from "@/lib/fonts";
 import { getPattern, gradientKeyframes } from "@/lib/patterns";
 import { generateVCard } from "@/lib/vcard";
 import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
+import { getEffectCSSForExport } from "@/lib/theme-effects";
 
 /**
  * Generates a self-contained static HTML page from the user's config
@@ -70,7 +71,7 @@ function generateHtml(config: ProfileConfig): string {
       if (link.type === "donation") {
         const platformLabels: Record<string, string> = {
           qris: "📱 QRIS", saweria: "🪙 Saweria", trakteer: "☕ Trakteer",
-          kofi: "☕ Ko-fi", patreon: "🎨 Patreon",
+          kofi: "☕ Ko-fi", buymeacoffee: "☕ Buy Me a Coffee", patreon: "🎨 Patreon",
         };
         const platform = link.donationPlatform || "qris";
         const platformLabel = platformLabels[platform] || platform;
@@ -463,6 +464,9 @@ function generateHtml(config: ProfileConfig): string {
     .testimonial-stars { display: flex; gap: 2px; margin-bottom: 0.5rem; }
     .testimonial-text { font-size: 0.75rem; line-height: 1.7; opacity: 0.8; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; color: ${theme.colors.text}; }
     .testimonial-name { font-size: 0.6875rem; font-weight: 600; margin-top: 0.5rem; opacity: 0.6; color: ${theme.colors.text}; }
+
+    /* Theme Effect */
+    ${getEffectCSSForExport(theme.themeEffect, theme.colors.accent)}
   </style>
   ${settings.customCSS ? `<style>/* Custom CSS */\n${settings.customCSS}</style>` : ""}
 </head>

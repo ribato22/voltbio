@@ -55,7 +55,7 @@ export interface LinkItem {
   /** Smart Action Button config (WhatsApp template) */
   actionConfig?: ActionConfig;
   /** Donation block fields */
-  donationPlatform?: "qris" | "saweria" | "trakteer" | "kofi" | "patreon";
+  donationPlatform?: "qris" | "saweria" | "trakteer" | "kofi" | "patreon" | "buymeacoffee";
   qrisImage?: string;       // Base64 compressed QRIS barcode
   donationCta?: string;     // Custom CTA text, e.g. "Traktir saya kopi ☕"
 }
@@ -89,6 +89,8 @@ export interface ThemeConfig {
   buttonStyle: "rounded" | "pill" | "square" | "outline";
   animation: "none" | "fade-up" | "slide-in" | "scale";
   backgroundPattern: "none" | "dots" | "grid" | "gradient" | "noise";
+  /** CSS-only visual effect applied to cards */
+  themeEffect?: "none" | "glassmorphism" | "brutalism" | "neon-glow" | "paper" | "retrowave";
 }
 
 /** SEO configuration */
@@ -129,6 +131,7 @@ export interface ThemePreset {
   colors: ThemeColors;
   font: string;
   buttonStyle: ThemeConfig["buttonStyle"];
+  themeEffect?: ThemeConfig["themeEffect"];
 }
 
 /** Editor active panel */
