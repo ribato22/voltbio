@@ -371,6 +371,80 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
               );
             }
 
+            // ── Donation Block ──
+            if (link.type === "donation") {
+              const platformLabels: Record<string, string> = {
+                qris: "📱 QRIS", saweria: "🪙 Saweria", trakteer: "☕ Trakteer",
+                kofi: "☕ Ko-fi", patreon: "🎨 Patreon",
+              };
+              const platformLabel = platformLabels[link.donationPlatform || "qris"];
+              const isQris = link.donationPlatform === "qris";
+
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="donation-card w-full"
+                >
+                  <div
+                    className="relative overflow-hidden rounded-2xl p-5 text-center"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.colors.accent}22, ${theme.colors.accent}08)`,
+                      border: `1.5px solid ${theme.colors.accent}40`,
+                    }}
+                  >
+                    {/* Platform badge */}
+                    <div
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold mb-3"
+                      style={{ background: `${theme.colors.accent}20`, color: theme.colors.accent }}
+                    >
+                      {platformLabel}
+                    </div>
+
+                    {/* Title */}
+                    <p className="text-base font-bold mb-1" style={{ color: theme.colors.text }}>
+                      {link.title || "Support Me"}
+                    </p>
+
+                    {/* CTA */}
+                    <p className="text-sm opacity-70 mb-4" style={{ color: theme.colors.text }}>
+                      {link.donationCta || ""}
+                    </p>
+
+                    {/* QRIS barcode display */}
+                    {isQris && link.qrisImage && (
+                      <div className="inline-block p-3 bg-white rounded-xl mb-3 shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={link.qrisImage}
+                          alt="Scan QRIS"
+                          className="w-40 h-40 object-contain"
+                        />
+                      </div>
+                    )}
+                    {isQris && link.qrisImage && (
+                      <p className="text-[10px] opacity-50" style={{ color: theme.colors.text }}>
+                        Scan dengan aplikasi e-wallet kamu
+                      </p>
+                    )}
+
+                    {/* Link button for non-QRIS */}
+                    {!isQris && link.url && (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-transform hover:scale-105"
+                        style={{ background: theme.colors.accent }}
+                      >
+                        {link.donationCta || `Donate via ${platformLabel}`}
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            }
+
             const iconKey = detectSocialIcon(link.url);
             const safeUrl = sanitizeUrl(link.url);
             const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;

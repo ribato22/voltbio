@@ -42,8 +42,8 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
-  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button */
-  type?: "link" | "header" | "action";
+  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar */
+  type?: "link" | "header" | "action" | "donation";
   isEmbed?: boolean;
   /** Display as inline PDF viewer */
   isPdfEmbed?: boolean;
@@ -54,6 +54,10 @@ export interface LinkItem {
   encryptedUrl?: string;
   /** Smart Action Button config (WhatsApp template) */
   actionConfig?: ActionConfig;
+  /** Donation block fields */
+  donationPlatform?: "qris" | "saweria" | "trakteer" | "kofi" | "patreon";
+  qrisImage?: string;       // Base64 compressed QRIS barcode
+  donationCta?: string;     // Custom CTA text, e.g. "Traktir saya kopi ☕"
 }
 
 /** User profile information */

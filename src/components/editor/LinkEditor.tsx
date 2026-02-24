@@ -44,10 +44,21 @@ import {
   Plus as PlusIcon,
   Trash2 as Trash2Icon,
   FileText,
+  Coffee,
+  Upload,
 } from "lucide-react";
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
 import { nanoid } from "nanoid";
+import { compressAvatar, validateImageFile } from "@/lib/image-utils";
+
+const DONATION_PLATFORMS = [
+  { value: "qris", label: "QRIS", icon: "📱" },
+  { value: "saweria", label: "Saweria", icon: "🪙" },
+  { value: "trakteer", label: "Trakteer", icon: "☕" },
+  { value: "kofi", label: "Ko-fi", icon: "☕" },
+  { value: "patreon", label: "Patreon", icon: "🎨" },
+] as const;
 
 /* ─────────────────────────────────────────────
    Select Options Input (local state + onBlur)
@@ -540,6 +551,104 @@ function SortableLinkItem({
             </div>
           )}
 
+          {/* ── Donation Config ── */}
+          {link.type === "donation" && (
+            <div className="space-y-3 p-3 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+              <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+                <Coffee className="w-3.5 h-3.5" />
+                Donation Settings
+              </p>
+
+              {/* Platform selector */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Platform
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {DONATION_PLATFORMS.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => onUpdate(link.id, { donationPlatform: p.value })}
+                      className={cn(
+                        "px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border",
+                        link.donationPlatform === p.value
+                          ? "bg-[var(--lf-accent)] text-white border-transparent"
+                          : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                      )}
+                    >
+                      {p.icon} {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA text */}
+              <Input
+                label="Call-to-Action"
+                value={link.donationCta || ""}
+                onChange={(e) => onUpdate(link.id, { donationCta: e.target.value })}
+                placeholder="Traktir saya kopi ☕"
+              />
+
+              {/* URL for non-QRIS platforms */}
+              {link.donationPlatform !== "qris" && (
+                <Input
+                  label="Donation URL"
+                  value={link.url}
+                  onChange={(e) => onUpdate(link.id, { url: e.target.value })}
+                  placeholder={
+                    link.donationPlatform === "saweria" ? "https://saweria.co/username" :
+                    link.donationPlatform === "trakteer" ? "https://trakteer.id/username" :
+                    link.donationPlatform === "kofi" ? "https://ko-fi.com/username" :
+                    "https://patreon.com/username"
+                  }
+                />
+              )}
+
+              {/* QRIS image upload */}
+              {link.donationPlatform === "qris" && (
+                <div>
+                  <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1.5 block">
+                    QRIS Barcode Image
+                  </label>
+                  {link.qrisImage && (
+                    <div className="mb-2 p-2 bg-white rounded-lg border border-[var(--lf-border)] inline-block">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={link.qrisImage} alt="QRIS" className="w-32 h-32 object-contain" />
+                    </div>
+                  )}
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-[var(--lf-border)] hover:border-[var(--lf-accent)] cursor-pointer transition-colors bg-[var(--lf-card-bg)]">
+                    <Upload className="w-4 h-4 text-[var(--lf-muted)]" />
+                    <span className="text-xs text-[var(--lf-muted)]">
+                      {link.qrisImage ? "Ganti gambar" : "Upload QRIS barcode"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const err = validateImageFile(file);
+                        if (err) { alert(err); return; }
+                        try {
+                          const compressed = await compressAvatar(file);
+                          onUpdate(link.id, { qrisImage: compressed });
+                        } catch {
+                          alert("Failed to process image");
+                        }
+                      }}
+                    />
+                  </label>
+                  <p className="text-[9px] text-[var(--lf-muted)] mt-1">
+                    Auto-compressed to {'<'}150KB for safe localStorage storage.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <Button
             variant="danger"
             size="sm"
@@ -547,7 +656,7 @@ function SortableLinkItem({
             className="w-full"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            {link.type === "header" ? "Delete Section" : "Delete Link"}
+            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : "Delete Link"}
           </Button>
         </div>
       )}
@@ -564,6 +673,7 @@ export function LinkEditor() {
   const addLink = useStore((s) => s.addLink);
   const addSection = useStore((s) => s.addSection);
   const addAction = useStore((s) => s.addAction);
+  const addDonation = useStore((s) => s.addDonation);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -612,6 +722,10 @@ export function LinkEditor() {
           <Button size="sm" variant="secondary" onClick={() => addAction()}>
             <Zap className="w-3.5 h-3.5" />
             Action
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => addDonation()}>
+            <Coffee className="w-3.5 h-3.5" />
+            Donation
           </Button>
           <Button size="sm" onClick={() => addLink()}>
             <Plus className="w-3.5 h-3.5" />

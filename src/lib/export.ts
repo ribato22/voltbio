@@ -66,6 +66,45 @@ function generateHtml(config: ProfileConfig): string {
       </div>`;
       }
 
+      // Donation Block
+      if (link.type === "donation") {
+        const platformLabels: Record<string, string> = {
+          qris: "📱 QRIS", saweria: "🪙 Saweria", trakteer: "☕ Trakteer",
+          kofi: "☕ Ko-fi", patreon: "🎨 Patreon",
+        };
+        const platform = link.donationPlatform || "qris";
+        const platformLabel = platformLabels[platform] || platform;
+        const isQris = platform === "qris";
+
+        let qrisHtml = "";
+        if (isQris && link.qrisImage) {
+          qrisHtml = `
+        <div style="display:inline-block;padding:0.75rem;background:#fff;border-radius:0.75rem;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+          <img src="${link.qrisImage}" alt="Scan QRIS" style="width:10rem;height:10rem;object-fit:contain" />
+        </div>
+        <p style="font-size:0.625rem;opacity:0.5;color:${theme.colors.text}">Scan dengan aplikasi e-wallet kamu</p>`;
+        }
+
+        let linkBtnHtml = "";
+        if (!isQris && link.url) {
+          linkBtnHtml = `
+        <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.625rem 1.25rem;border-radius:9999px;font-size:0.875rem;font-weight:600;color:#fff;background:${theme.colors.accent};text-decoration:none;transition:transform 0.2s">
+          ${escapeHtml(link.donationCta || `Donate via ${platformLabel}`)}
+        </a>`;
+        }
+
+        return `
+      <div style="width:100%">
+        <div style="position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem;text-align:center;background:linear-gradient(135deg,${theme.colors.accent}22,${theme.colors.accent}08);border:1.5px solid ${theme.colors.accent}40">
+          <div style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.625rem;font-weight:700;margin-bottom:0.75rem;background:${theme.colors.accent}20;color:${theme.colors.accent}">${platformLabel}</div>
+          <p style="font-size:1rem;font-weight:700;margin-bottom:0.25rem;color:${theme.colors.text}">${escapeHtml(link.title || "Support Me")}</p>
+          <p style="font-size:0.875rem;opacity:0.7;margin-bottom:1rem;color:${theme.colors.text}">${escapeHtml(link.donationCta || "")}</p>
+          ${qrisHtml}
+          ${linkBtnHtml}
+        </div>
+      </div>`;
+      }
+
       const safeUrl = sanitizeUrl(link.url);
       const iconKey = detectSocialIcon(link.url);
       const rel = link.target === "_blank" ? ' rel="noopener noreferrer"' : "";

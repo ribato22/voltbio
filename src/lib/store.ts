@@ -71,6 +71,7 @@ interface VoltBioStore {
   addLink: (link?: Partial<LinkItem>) => void;
   addSection: (title?: string) => void;
   addAction: (title?: string) => void;
+  addDonation: () => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -187,6 +188,29 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, action],
+            },
+          };
+        }),
+
+      addDonation: () =>
+        set((state) => {
+          const donation: LinkItem = {
+            id: nanoid(10),
+            title: "Support Me",
+            url: "",
+            icon: "heart",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_blank",
+            type: "donation",
+            donationPlatform: "qris",
+            donationCta: "Traktir saya kopi ☕",
+            qrisImage: "",
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, donation],
             },
           };
         }),
