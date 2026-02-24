@@ -9,6 +9,7 @@ import { sanitizeUrl, detectSocialIcon, getAvatarFallback } from "@/lib/utils";
 import { buildGoogleFontsUrl, getFontFallback } from "@/lib/fonts";
 import { getPattern, gradientKeyframes } from "@/lib/patterns";
 import { generateVCard } from "@/lib/vcard";
+import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
 
 /**
  * Generates a self-contained static HTML page from the user's config
@@ -59,7 +60,24 @@ function generateHtml(config: ProfileConfig): string {
       const safeUrl = sanitizeUrl(link.url);
       const iconKey = detectSocialIcon(link.url);
       const rel = link.target === "_blank" ? ' rel="noopener noreferrer"' : "";
+      const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;
 
+      // Embed iframe
+      if (link.isEmbed && embedInfo) {
+        const titleHtml = link.title
+          ? `<p style="font-size:0.75rem;font-weight:500;padding:0.5rem 0.75rem;opacity:0.7;color:${theme.colors.text}">${escapeHtml(link.title)}</p>`
+          : "";
+        const iframeHeight = embedInfo.platform === "youtube"
+          ? 'style="aspect-ratio:16/9;width:100%;border:none"'
+          : `style="height:${getSpotifyHeight(embedInfo.type)}px;width:100%;border:none"`;
+        return `
+      <div class="embed-card" style="border:1px solid ${theme.colors.cardBackground};border-radius:0.75rem;overflow:hidden;width:100%">
+        ${titleHtml}
+        <iframe src="${embedInfo.embedUrl}" title="${escapeHtml(link.title || 'Embedded media')}" ${iframeHeight} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>`;
+      }
+
+      // Standard link button
       return `
       <a href="${safeUrl || "#"}" target="${link.target}"${rel}
          class="link-card"

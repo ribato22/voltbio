@@ -7,6 +7,7 @@ import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
 import { detectSocialIcon, sanitizeUrl, getAvatarFallback, cn } from "@/lib/utils";
 import { downloadVCard } from "@/lib/vcard";
+import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
 
 /* ─────────────────────────────────────────────
    Stagger Animation Variants
@@ -178,7 +179,50 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
           {enabledLinks.map((link) => {
             const iconKey = detectSocialIcon(link.url);
             const safeUrl = sanitizeUrl(link.url);
+            const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;
 
+            // ── Render Embed iframe ──
+            if (link.isEmbed && embedInfo) {
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="w-full overflow-hidden rounded-xl"
+                  style={{
+                    border: `1px solid ${theme.colors.cardBackground}`,
+                  }}
+                >
+                  {link.title && (
+                    <p
+                      className="text-xs font-medium px-3 py-2 opacity-70"
+                      style={{ color: theme.colors.text }}
+                    >
+                      {link.title}
+                    </p>
+                  )}
+                  <iframe
+                    src={embedInfo.embedUrl}
+                    title={link.title || "Embedded media"}
+                    className={cn(
+                      "w-full border-0",
+                      embedInfo.platform === "youtube"
+                        ? "aspect-video"
+                        : ""
+                    )}
+                    style={
+                      embedInfo.platform === "spotify"
+                        ? { height: getSpotifyHeight(embedInfo.type) }
+                        : undefined
+                    }
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                  />
+                </motion.div>
+              );
+            }
+
+            // ── Render Standard Link Button ──
             return (
               <motion.a
                 key={link.id}

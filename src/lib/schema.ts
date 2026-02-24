@@ -12,6 +12,7 @@ export const LinkSchema = z.object({
   enabled: z.boolean().default(true),
   order: z.number().int().min(0),
   target: z.enum(["_blank", "_self"]).default("_blank"),
+  isEmbed: z.boolean().optional(),
 });
 
 export const ProfileSchema = z.object({

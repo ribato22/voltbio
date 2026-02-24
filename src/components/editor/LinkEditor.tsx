@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { SocialIcon } from "@/components/preview/SocialIcon";
 import { detectSocialIcon, cn } from "@/lib/utils";
+import { isEmbeddable, detectEmbed } from "@/lib/embed";
 import {
   Link2,
   Plus,
@@ -153,6 +154,30 @@ function SortableLinkItem({
             placeholder="https://example.com"
             type="url"
           />
+
+          {/* ── Embed Toggle ── */}
+          {isEmbeddable(link.url) && (() => {
+            const info = detectEmbed(link.url);
+            const label = info?.platform === "youtube"
+              ? "▶ Show YouTube Player"
+              : info?.platform === "spotify"
+                ? "🎵 Show Spotify Player"
+                : "Show Embed";
+            return (
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--lf-accent)]/5 border border-[var(--lf-accent)]/20">
+                <span className="text-xs font-medium text-[var(--lf-text)]">
+                  {label}
+                </span>
+                <Toggle
+                  checked={!!link.isEmbed}
+                  onCheckedChange={() =>
+                    onUpdate(link.id, { isEmbed: !link.isEmbed })
+                  }
+                  id={`embed-${link.id}`}
+                />
+              </div>
+            );
+          })()}
 
           <div>
             <p className="text-xs font-medium text-[var(--lf-muted)] mb-2">
