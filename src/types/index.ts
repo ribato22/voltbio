@@ -20,6 +20,8 @@ export interface Profile {
   bio: string;
   avatar: string;
   location?: string;
+  phone?: string;
+  email?: string;
 }
 
 /** Theme color configuration */

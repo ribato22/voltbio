@@ -167,6 +167,22 @@ export function ProfileEditor() {
         placeholder="City, Country"
         maxLength={100}
       />
+
+      <Input
+        label="Phone / WhatsApp"
+        value={profile.phone || ""}
+        onChange={(e) => updateProfile({ phone: e.target.value })}
+        placeholder="+62 812-3456-7890"
+        maxLength={20}
+      />
+
+      <Input
+        label="Email"
+        value={profile.email || ""}
+        onChange={(e) => updateProfile({ email: e.target.value })}
+        placeholder="you@example.com"
+        maxLength={100}
+      />
     </div>
   );
 }

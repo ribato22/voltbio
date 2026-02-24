@@ -8,6 +8,7 @@ import type { ProfileConfig } from "@/types";
 import { sanitizeUrl, detectSocialIcon, getAvatarFallback } from "@/lib/utils";
 import { buildGoogleFontsUrl, getFontFallback } from "@/lib/fonts";
 import { getPattern, gradientKeyframes } from "@/lib/patterns";
+import { generateVCard } from "@/lib/vcard";
 
 /**
  * Generates a self-contained static HTML page from the user's config
@@ -83,6 +84,30 @@ function generateHtml(config: ProfileConfig): string {
   // ── Location HTML ──
   const locationHtml = profile.location
     ? `<p class="location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${escapeHtml(profile.location)}</p>`
+    : "";
+
+  // ── VCard Button HTML ──
+  const hasContact = profile.phone || profile.email;
+  const vcardButtonHtml = hasContact
+    ? `<button class="save-contact" onclick="downloadVCard()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Save Contact
+      </button>`
+    : "";
+
+  // ── VCard inline JS ──
+  const vcardData = hasContact ? generateVCard(profile, `https://${profile.username}.github.io/voltbio`) : "";
+  const vcardScript = hasContact
+    ? `<script>
+      function downloadVCard(){
+        var vcf=${JSON.stringify(vcardData)};
+        var b=new Blob([vcf],{type:'text/vcard;charset=utf-8'});
+        var u=URL.createObjectURL(b);
+        var a=document.createElement('a');
+        a.href=u;a.download='${escapeHtml(profile.username || profile.name || "contact")}.vcf';
+        a.click();URL.revokeObjectURL(u);
+      }
+      </script>`
     : "";
 
   // ── Footer HTML ──
@@ -232,6 +257,24 @@ function generateHtml(config: ProfileConfig): string {
     .link-title { flex: 1; text-align: center; }
     .link-spacer { width: 18px; flex-shrink: 0; }
 
+    .save-contact {
+      margin-top: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      background: ${theme.colors.accent}18;
+      color: ${theme.colors.accent};
+      border: 1.5px solid ${theme.colors.accent}40;
+    }
+    .save-contact:hover { transform: scale(1.05); }
+    .save-contact:active { transform: scale(0.95); }
+
     .footer {
       margin-top: 3rem;
       font-size: 0.75rem;
@@ -245,11 +288,13 @@ function generateHtml(config: ProfileConfig): string {
     <h1 class="name">${escapeHtml(profile.name || "Your Name")}</h1>
     ${locationHtml}
     <p class="bio">${escapeHtml(profile.bio || "Welcome to my link page")}</p>
+    ${vcardButtonHtml}
     <div class="links">
       ${linksHtml}
     </div>
     ${footerHtml}
   </main>
+  ${vcardScript}
 </body>
 </html>`;
 }

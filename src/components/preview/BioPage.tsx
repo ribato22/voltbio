@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Sparkles } from "lucide-react";
+import { MapPin, Sparkles, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
 import { detectSocialIcon, sanitizeUrl, getAvatarFallback, cn } from "@/lib/utils";
+import { downloadVCard } from "@/lib/vcard";
 
 /* ─────────────────────────────────────────────
    Stagger Animation Variants
@@ -145,6 +146,32 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         >
           {profile.bio || "Welcome to my link page"}
         </motion.p>
+
+        {/* ── Save Contact Button ── */}
+        {(profile.phone || profile.email) && (
+          <motion.button
+            variants={fadeUpVariants}
+            type="button"
+            onClick={() => {
+              const pageUrl = profile.username
+                ? `https://${profile.username}.github.io/voltbio`
+                : undefined;
+              downloadVCard(profile, pageUrl);
+            }}
+            className="mt-3 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
+            style={{
+              background: theme.colors.accent + "18",
+              color: theme.colors.accent,
+              border: `1.5px solid ${theme.colors.accent}40`,
+            }}
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            Save Contact
+          </motion.button>
+        )}
 
         {/* ── Links ── */}
         <div className="w-full mt-8 space-y-3">

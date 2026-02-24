@@ -20,6 +20,8 @@ export const ProfileSchema = z.object({
   bio: z.string().max(300).default(""),
   avatar: z.string().default(""),
   location: z.string().max(100).optional(),
+  phone: z.string().max(20).optional(),
+  email: z.string().email().or(z.literal("")).optional(),
 });
 
 export const ThemeColorsSchema = z.object({
