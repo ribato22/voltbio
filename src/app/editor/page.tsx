@@ -238,7 +238,7 @@ export default function EditorPage() {
             <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto">
               <div
                 className={cn(
-                  "transition-all duration-300 ease-in-out overflow-hidden relative flex flex-col",
+                  "transition-all duration-300 ease-in-out overflow-hidden relative flex flex-col transform-gpu",
                   previewDevice === "mobile" && "w-[375px] h-[80vh] max-h-[812px] rounded-[2.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
                   previewDevice === "tablet" && "w-[768px] h-[80vh] max-h-[900px] rounded-3xl border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
                   previewDevice === "desktop" && "w-full max-w-5xl h-[80vh] max-h-[900px] rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl"
