@@ -42,8 +42,8 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
-  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar */
-  type?: "link" | "header" | "action" | "donation";
+  /** 'link' = clickable URL, 'header' = section divider, 'action' = smart form button, 'donation' = tip jar, 'portfolio' = image grid */
+  type?: "link" | "header" | "action" | "donation" | "portfolio";
   isEmbed?: boolean;
   /** Display as inline PDF viewer */
   isPdfEmbed?: boolean;
@@ -58,6 +58,19 @@ export interface LinkItem {
   donationPlatform?: "qris" | "saweria" | "trakteer" | "kofi" | "patreon" | "buymeacoffee";
   qrisImage?: string;       // Base64 compressed QRIS barcode
   donationCta?: string;     // Custom CTA text, e.g. "Traktir saya kopi ☕"
+  /** Portfolio / Image Grid fields */
+  portfolioImages?: PortfolioImage[];
+  portfolioColumns?: 2 | 3 | 4;
+  portfolioGap?: "sm" | "md" | "lg";
+}
+
+/** A single image in a portfolio grid block */
+export interface PortfolioImage {
+  id: string;
+  dataUrl: string;      // Base64 compressed via Canvas
+  caption?: string;
+  width: number;
+  height: number;
 }
 
 /** User profile information */

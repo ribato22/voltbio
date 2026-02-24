@@ -72,6 +72,7 @@ interface VoltBioStore {
   addSection: (title?: string) => void;
   addAction: (title?: string) => void;
   addDonation: () => void;
+  addPortfolio: () => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -211,6 +212,29 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, donation],
+            },
+          };
+        }),
+
+      addPortfolio: () =>
+        set((state) => {
+          const portfolio: LinkItem = {
+            id: nanoid(10),
+            title: "My Portfolio",
+            url: "",
+            icon: "image",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_self",
+            type: "portfolio",
+            portfolioImages: [],
+            portfolioColumns: 3,
+            portfolioGap: "md",
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, portfolio],
             },
           };
         }),

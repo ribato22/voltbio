@@ -46,11 +46,13 @@ import {
   FileText,
   Coffee,
   Upload,
+  Image,
 } from "lucide-react";
 import type { LinkItem, ActionField } from "@/types";
 import { encryptUrl } from "@/lib/crypto";
 import { nanoid } from "nanoid";
 import { compressAvatar, validateImageFile } from "@/lib/image-utils";
+import { PortfolioUploader } from "@/components/editor/PortfolioUploader";
 
 const DONATION_PLATFORMS = [
   { value: "qris", label: "QRIS", icon: "📱" },
@@ -651,6 +653,70 @@ function SortableLinkItem({
             </div>
           )}
 
+          {/* ── Portfolio Config ── */}
+          {link.type === "portfolio" && (
+            <div className="space-y-3 p-3 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+              <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+                <Image className="w-3.5 h-3.5" />
+                Portfolio Settings
+              </p>
+
+              {/* Column count selector */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Columns
+                </label>
+                <div className="flex gap-1.5">
+                  {([2, 3, 4] as const).map((cols) => (
+                    <button
+                      key={cols}
+                      type="button"
+                      onClick={() => onUpdate(link.id, { portfolioColumns: cols })}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border",
+                        (link.portfolioColumns || 3) === cols
+                          ? "bg-[var(--lf-accent)] text-white border-transparent"
+                          : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                      )}
+                    >
+                      {cols} cols
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gap selector */}
+              <div>
+                <label className="text-[10px] text-[var(--lf-muted)] uppercase tracking-wider font-medium mb-1 block">
+                  Spacing
+                </label>
+                <div className="flex gap-1.5">
+                  {(["sm", "md", "lg"] as const).map((gap) => (
+                    <button
+                      key={gap}
+                      type="button"
+                      onClick={() => onUpdate(link.id, { portfolioGap: gap })}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border",
+                        (link.portfolioGap || "md") === gap
+                          ? "bg-[var(--lf-accent)] text-white border-transparent"
+                          : "bg-[var(--lf-card-bg)] text-[var(--lf-text)] border-[var(--lf-border)] hover:border-[var(--lf-accent)]"
+                      )}
+                    >
+                      {gap.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Image uploader */}
+              <PortfolioUploader
+                images={link.portfolioImages || []}
+                onChange={(imgs) => onUpdate(link.id, { portfolioImages: imgs })}
+              />
+            </div>
+          )}
+
           <Button
             variant="danger"
             size="sm"
@@ -658,7 +724,7 @@ function SortableLinkItem({
             className="w-full"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : "Delete Link"}
+            {link.type === "header" ? "Delete Section" : link.type === "donation" ? "Delete Donation" : link.type === "portfolio" ? "Delete Portfolio" : "Delete Link"}
           </Button>
         </div>
       )}
@@ -676,6 +742,7 @@ export function LinkEditor() {
   const addSection = useStore((s) => s.addSection);
   const addAction = useStore((s) => s.addAction);
   const addDonation = useStore((s) => s.addDonation);
+  const addPortfolio = useStore((s) => s.addPortfolio);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -728,6 +795,10 @@ export function LinkEditor() {
           <Button size="sm" variant="secondary" onClick={() => addDonation()}>
             <Coffee className="w-3.5 h-3.5" />
             Donation
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => addPortfolio()}>
+            <Image className="w-3.5 h-3.5" />
+            Portfolio
           </Button>
           <Button size="sm" onClick={() => addLink()}>
             <Plus className="w-3.5 h-3.5" />

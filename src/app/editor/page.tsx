@@ -238,18 +238,18 @@ export default function EditorPage() {
             <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto">
               <div
                 className={cn(
-                  "transition-all duration-300 ease-in-out overflow-hidden relative",
-                  previewDevice === "mobile" && "w-[375px] min-h-[700px] rounded-[2.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
-                  previewDevice === "tablet" && "w-[768px] min-h-[700px] rounded-[1.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
-                  previewDevice === "desktop" && "w-full max-w-5xl min-h-[600px] rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl"
+                  "transition-all duration-300 ease-in-out overflow-hidden relative flex flex-col",
+                  previewDevice === "mobile" && "w-[375px] h-[80vh] max-h-[812px] rounded-[2.5rem] border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
+                  previewDevice === "tablet" && "w-[768px] h-[80vh] max-h-[900px] rounded-3xl border-4 border-neutral-700 bg-neutral-900 shadow-2xl",
+                  previewDevice === "desktop" && "w-full max-w-5xl h-[80vh] max-h-[900px] rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl"
                 )}
               >
                 {/* Notch (mobile only) */}
                 {previewDevice === "mobile" && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-7 bg-neutral-900 rounded-b-2xl z-10" />
                 )}
-                {/* Screen */}
-                <div className={cn("h-full overflow-y-auto", previewDevice === "mobile" && "pt-8")}>
+                {/* Screen — scrolls independently */}
+                <div className={cn("flex-1 overflow-y-auto", previewDevice === "mobile" && "pt-8")}>
                   <BioPage embedded />
                 </div>
               </div>

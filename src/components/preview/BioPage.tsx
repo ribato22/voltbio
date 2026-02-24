@@ -11,7 +11,8 @@ import { downloadVCard } from "@/lib/vcard";
 import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
 import { decryptUrl } from "@/lib/crypto";
 import { getCardEffectStyles } from "@/lib/theme-effects";
-import type { LinkItem, ThemeConfig } from "@/types";
+import { Lightbox } from "@/components/preview/Lightbox";
+import type { LinkItem, ThemeConfig, PortfolioImage } from "@/types";
 
 /* ─────────────────────────────────────────────
    Action Card Component (WhatsApp Template Form)
@@ -174,6 +175,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const { profile, links, testimonials, pages, theme, settings } = useStore((s) => s.config);
   const [activeTab, setActiveTab] = useReactState<string | null>(null);
+  const [lightboxState, setLightboxState] = useReactState<{ images: PortfolioImage[]; index: number } | null>(null);
 
   if (!mounted) {
     return (
@@ -203,6 +205,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
   const isOutline = theme.buttonStyle === "outline";
 
   return (
+    <>
     <div
       id="voltbio-page"
       className={cn(
@@ -446,6 +449,68 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
               );
             }
 
+            // ── Portfolio / Image Grid Block ──
+            if (link.type === "portfolio") {
+              const images = link.portfolioImages || [];
+              const cols = link.portfolioColumns || 3;
+              const gapMap = { sm: "4px", md: "8px", lg: "12px" };
+              const gap = gapMap[link.portfolioGap || "md"];
+
+              if (images.length === 0) return null;
+
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="portfolio-block w-full"
+                >
+                  {/* Title */}
+                  {link.title && (
+                    <p
+                      className="text-sm font-semibold mb-2 opacity-80"
+                      style={{ color: theme.colors.text }}
+                    >
+                      {link.title}
+                    </p>
+                  )}
+                  {/* Masonry grid via CSS columns */}
+                  <div
+                    style={{
+                      columnCount: cols,
+                      columnGap: gap,
+                    }}
+                  >
+                    {images.map((img, imgIdx) => (
+                      <div
+                        key={img.id}
+                        className="mb-[var(--portfolio-gap)] break-inside-avoid cursor-pointer group relative overflow-hidden rounded-lg"
+                        style={{
+                          // @ts-expect-error CSS custom property
+                          "--portfolio-gap": gap,
+                          marginBottom: gap,
+                        }}
+                        onClick={() => setLightboxState({ images, index: imgIdx })}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.dataUrl}
+                          alt={img.caption || `Portfolio image ${imgIdx + 1}`}
+                          className="w-full h-auto block rounded-lg transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        {/* Caption overlay */}
+                        {img.caption && (
+                          <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-white text-[10px] font-medium truncate">{img.caption}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            }
+
             const iconKey = detectSocialIcon(link.url);
             const safeUrl = sanitizeUrl(link.url);
             const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;
@@ -666,5 +731,15 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         )}
       </motion.div>
     </div>
+
+    {/* Portfolio Lightbox */}
+    {lightboxState && (
+      <Lightbox
+        images={lightboxState.images}
+        initialIndex={lightboxState.index}
+        onClose={() => setLightboxState(null)}
+      />
+    )}
+    </>
   );
 }

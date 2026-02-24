@@ -106,6 +106,47 @@ function generateHtml(config: ProfileConfig): string {
       </div>`;
       }
 
+      // Portfolio / Image Grid Block
+      if (link.type === "portfolio") {
+        const images = link.portfolioImages || [];
+        if (images.length === 0) return "";
+        const cols = link.portfolioColumns || 3;
+        const gapMap = { sm: "4px", md: "8px", lg: "12px" };
+        const gap = gapMap[link.portfolioGap || "md"];
+
+        const gridHtml = images.map((img, idx) => {
+          const captionOverlay = img.caption ? `
+            <div style="position:absolute;bottom:0;left:0;right:0;padding:0.5rem;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);color:#fff;font-size:0.625rem;font-weight:500">${escapeHtml(img.caption)}</div>` : "";
+          return `
+          <a href="#lb-${link.id}-${idx}" style="break-inside:avoid;display:block;margin-bottom:${gap};position:relative;overflow:hidden;border-radius:0.5rem;text-decoration:none">
+            <img src="${img.dataUrl}" alt="${escapeHtml(img.caption || `Image ${idx + 1}`)}" style="width:100%;height:auto;display:block;border-radius:0.5rem" loading="lazy" />
+            ${captionOverlay}
+          </a>`;
+        }).join("");
+
+        const lightboxHtml = images.map((img, idx) => `
+        <div id="lb-${link.id}-${idx}" style="position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;padding:1rem">
+          <style>#lb-${link.id}-${idx}:target{display:flex!important}</style>
+          <a href="#" style="position:absolute;top:1rem;right:1rem;width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;text-decoration:none">&times;</a>
+          ${idx > 0 ? `<a href="#lb-${link.id}-${idx - 1}" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;text-decoration:none">&#8249;</a>` : ""}
+          ${idx < images.length - 1 ? `<a href="#lb-${link.id}-${idx + 1}" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;text-decoration:none">&#8250;</a>` : ""}
+          <div style="max-width:90vw;max-height:85vh;display:flex;flex-direction:column;align-items:center;gap:0.75rem">
+            <img src="${img.dataUrl}" alt="${escapeHtml(img.caption || `Image ${idx + 1}`)}" style="max-width:100%;max-height:80vh;object-fit:contain;border-radius:0.5rem" />
+            ${img.caption ? `<p style="color:rgba(255,255,255,0.9);font-size:0.875rem">${escapeHtml(img.caption)}</p>` : ""}
+            <p style="color:rgba(255,255,255,0.4);font-size:0.75rem">${idx + 1} / ${images.length}</p>
+          </div>
+        </div>`).join("");
+
+        return `
+      <div style="width:100%">
+        ${link.title ? `<p style="font-size:0.875rem;font-weight:600;margin-bottom:0.5rem;opacity:0.8;color:${theme.colors.text}">${escapeHtml(link.title)}</p>` : ""}
+        <div style="column-count:${cols};column-gap:${gap}">
+          ${gridHtml}
+        </div>
+      </div>
+      ${lightboxHtml}`;
+      }
+
       const safeUrl = sanitizeUrl(link.url);
       const iconKey = detectSocialIcon(link.url);
       const rel = link.target === "_blank" ? ' rel="noopener noreferrer"' : "";
