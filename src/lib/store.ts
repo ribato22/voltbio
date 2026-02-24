@@ -30,6 +30,7 @@ const defaultConfig: ProfileConfig = {
       target: "_blank",
     },
   ],
+  testimonials: [],
   theme: {
     preset: "midnight",
     mode: "dark",
@@ -316,7 +317,18 @@ export const useStore = create<VoltBioStore>()(
     }),
     {
       name: "voltbio-store",
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown, version: number) => {
+        const state = persisted as Record<string, unknown>;
+        if (version < 2) {
+          // Add testimonials array to configs persisted before v2
+          const cfg = state.config as Record<string, unknown> | undefined;
+          if (cfg && !Array.isArray(cfg.testimonials)) {
+            cfg.testimonials = [];
+          }
+        }
+        return state as unknown as VoltBioStore;
+      },
     }
   )
 );
