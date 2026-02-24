@@ -13,6 +13,7 @@ export const LinkSchema = z.object({
   order: z.number().int().min(0),
   target: z.enum(["_blank", "_self"]).default("_blank"),
   isEmbed: z.boolean().optional(),
+  type: z.enum(["link", "header"]).optional(),
   validFrom: z.string().optional(),
   validUntil: z.string().optional(),
 });

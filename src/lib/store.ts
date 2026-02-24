@@ -67,6 +67,7 @@ interface VoltBioStore {
 
   // Link actions
   addLink: (link?: Partial<LinkItem>) => void;
+  addSection: (title?: string) => void;
   updateLink: (id: string, updates: Partial<LinkItem>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: LinkItem[]) => void;
@@ -125,6 +126,26 @@ export const useStore = create<VoltBioStore>()(
             config: {
               ...state.config,
               links: [...state.config.links, newLink],
+            },
+          };
+        }),
+
+      addSection: (title) =>
+        set((state) => {
+          const section: LinkItem = {
+            id: nanoid(10),
+            title: title ?? "Section",
+            url: "",
+            icon: "folder",
+            enabled: true,
+            order: state.config.links.length,
+            target: "_blank",
+            type: "header",
+          };
+          return {
+            config: {
+              ...state.config,
+              links: [...state.config.links, section],
             },
           };
         }),

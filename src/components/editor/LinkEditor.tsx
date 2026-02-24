@@ -35,6 +35,7 @@ import {
   ChevronUp,
   ExternalLink,
   Calendar,
+  FolderOpen,
 } from "lucide-react";
 import type { LinkItem } from "@/types";
 
@@ -96,16 +97,22 @@ function SortableLinkItem({
         </button>
 
         {/* Icon */}
-        <SocialIcon iconKey={iconKey} size={16} className="text-[var(--lf-accent)]" />
+        {link.type === "header" ? (
+          <FolderOpen className="w-4 h-4 text-[var(--lf-accent)]" />
+        ) : (
+          <SocialIcon iconKey={iconKey} size={16} className="text-[var(--lf-accent)]" />
+        )}
 
         {/* Title & URL */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--lf-text)] truncate">
-            {link.title || "Untitled"}
+            {link.type === "header" ? `📂 ${link.title || "Section"}` : link.title || "Untitled"}
           </p>
-          <p className="text-xs text-[var(--lf-muted)] truncate">
-            {link.url || "https://"}
-          </p>
+          {link.type !== "header" && (
+            <p className="text-xs text-[var(--lf-muted)] truncate">
+              {link.url || "https://"}
+            </p>
+          )}
         </div>
 
         {/* Enable/Disable */}
@@ -135,131 +142,136 @@ function SortableLinkItem({
       {expanded && (
         <div className="px-3 pb-3 space-y-3 border-t border-[var(--lf-border)] pt-3">
           <Input
-            label="Title"
+            label={link.type === "header" ? "Section Title" : "Title"}
             value={link.title}
             onChange={(e) => onUpdate(link.id, { title: e.target.value })}
-            placeholder="Link Title"
+            placeholder={link.type === "header" ? "Section Name" : "Link Title"}
             maxLength={100}
           />
 
-          <Input
-            label="URL"
-            value={link.url}
-            onChange={(e) => {
-              const url = e.target.value;
-              onUpdate(link.id, {
-                url,
-                icon: detectSocialIcon(url),
-              });
-            }}
-            placeholder="https://example.com"
-            type="url"
-          />
+          {/* ── Link-only fields (hide for section headers) ── */}
+          {link.type !== "header" && (
+            <>
+              <Input
+                label="URL"
+                value={link.url}
+                onChange={(e) => {
+                  const url = e.target.value;
+                  onUpdate(link.id, {
+                    url,
+                    icon: detectSocialIcon(url),
+                  });
+                }}
+                placeholder="https://example.com"
+                type="url"
+              />
 
-          {/* ── Embed Toggle ── */}
-          {isEmbeddable(link.url) && (() => {
-            const info = detectEmbed(link.url);
-            const label = info?.platform === "youtube"
-              ? "▶ Show YouTube Player"
-              : info?.platform === "spotify"
-                ? "🎵 Show Spotify Player"
-                : "Show Embed";
-            return (
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--lf-accent)]/5 border border-[var(--lf-accent)]/20">
-                <span className="text-xs font-medium text-[var(--lf-text)]">
-                  {label}
-                </span>
-                <Toggle
-                  checked={!!link.isEmbed}
-                  onCheckedChange={() =>
-                    onUpdate(link.id, { isEmbed: !link.isEmbed })
-                  }
-                  id={`embed-${link.id}`}
-                />
-              </div>
-            );
-          })()}
+              {/* ── Embed Toggle ── */}
+              {isEmbeddable(link.url) && (() => {
+                const info = detectEmbed(link.url);
+                const label = info?.platform === "youtube"
+                  ? "▶ Show YouTube Player"
+                  : info?.platform === "spotify"
+                    ? "🎵 Show Spotify Player"
+                    : "Show Embed";
+                return (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--lf-accent)]/5 border border-[var(--lf-accent)]/20">
+                    <span className="text-xs font-medium text-[var(--lf-text)]">
+                      {label}
+                    </span>
+                    <Toggle
+                      checked={!!link.isEmbed}
+                      onCheckedChange={() =>
+                        onUpdate(link.id, { isEmbed: !link.isEmbed })
+                      }
+                      id={`embed-${link.id}`}
+                    />
+                  </div>
+                );
+              })()}
 
-          <div>
-            <p className="text-xs font-medium text-[var(--lf-muted)] mb-2">
-              Open in
-            </p>
-            <div className="flex gap-1 p-1 rounded-xl bg-[var(--lf-bg)] border border-[var(--lf-border)]">
-              {(["_blank", "_self"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => onUpdate(link.id, { target: t })}
-                  className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer",
-                    link.target === t
-                      ? "bg-[var(--lf-accent)] text-white"
-                      : "text-[var(--lf-muted)]"
-                  )}
-                  aria-pressed={link.target === t}
-                >
-                  {t === "_blank" ? (
-                    <>
-                      <ExternalLink className="w-3 h-3" />
-                      New Tab
-                    </>
-                  ) : (
-                    "Same Tab"
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Schedule Settings ── */}
-          <div>
-            <p className="text-xs font-medium text-[var(--lf-muted)] mb-2 flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              Schedule (optional)
-            </p>
-            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-[var(--lf-muted)] mb-0.5 block">Start Date</label>
-                <div className="relative">
-                  <input
-                    type="datetime-local"
-                    value={link.validFrom || ""}
-                    onChange={(e) => onUpdate(link.id, { validFrom: e.target.value || undefined })}
-                    className="w-full text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
-                  />
-                  {link.validFrom && (
+                <p className="text-xs font-medium text-[var(--lf-muted)] mb-2">
+                  Open in
+                </p>
+                <div className="flex gap-1 p-1 rounded-xl bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+                  {(["_blank", "_self"] as const).map((t) => (
                     <button
+                      key={t}
                       type="button"
-                      onClick={() => onUpdate(link.id, { validFrom: undefined })}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--lf-muted)] hover:text-[var(--lf-text)] text-[10px] cursor-pointer"
+                      onClick={() => onUpdate(link.id, { target: t })}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer",
+                        link.target === t
+                          ? "bg-[var(--lf-accent)] text-white"
+                          : "text-[var(--lf-muted)]"
+                      )}
+                      aria-pressed={link.target === t}
                     >
-                      ✕
+                      {t === "_blank" ? (
+                        <>
+                          <ExternalLink className="w-3 h-3" />
+                          New Tab
+                        </>
+                      ) : (
+                        "Same Tab"
+                      )}
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
+
+              {/* ── Schedule Settings ── */}
               <div>
-                <label className="text-[10px] text-[var(--lf-muted)] mb-0.5 block">End Date</label>
-                <div className="relative">
-                  <input
-                    type="datetime-local"
-                    value={link.validUntil || ""}
-                    onChange={(e) => onUpdate(link.id, { validUntil: e.target.value || undefined })}
-                    className="w-full text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
-                  />
-                  {link.validUntil && (
-                    <button
-                      type="button"
-                      onClick={() => onUpdate(link.id, { validUntil: undefined })}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--lf-muted)] hover:text-[var(--lf-text)] text-[10px] cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  )}
+                <p className="text-xs font-medium text-[var(--lf-muted)] mb-2 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  Schedule (optional)
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-[var(--lf-muted)] mb-0.5 block">Start Date</label>
+                    <div className="relative">
+                      <input
+                        type="datetime-local"
+                        value={link.validFrom || ""}
+                        onChange={(e) => onUpdate(link.id, { validFrom: e.target.value || undefined })}
+                        className="w-full text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+                      />
+                      {link.validFrom && (
+                        <button
+                          type="button"
+                          onClick={() => onUpdate(link.id, { validFrom: undefined })}
+                          className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--lf-muted)] hover:text-[var(--lf-text)] text-[10px] cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[var(--lf-muted)] mb-0.5 block">End Date</label>
+                    <div className="relative">
+                      <input
+                        type="datetime-local"
+                        value={link.validUntil || ""}
+                        onChange={(e) => onUpdate(link.id, { validUntil: e.target.value || undefined })}
+                        className="w-full text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+                      />
+                      {link.validUntil && (
+                        <button
+                          type="button"
+                          onClick={() => onUpdate(link.id, { validUntil: undefined })}
+                          className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--lf-muted)] hover:text-[var(--lf-text)] text-[10px] cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
           <Button
             variant="danger"
@@ -268,7 +280,7 @@ function SortableLinkItem({
             className="w-full"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            Delete Link
+            {link.type === "header" ? "Delete Section" : "Delete Link"}
           </Button>
         </div>
       )}
@@ -283,6 +295,7 @@ function SortableLinkItem({
 export function LinkEditor() {
   const links = useStore((s) => s.config.links);
   const addLink = useStore((s) => s.addLink);
+  const addSection = useStore((s) => s.addSection);
   const updateLink = useStore((s) => s.updateLink);
   const removeLink = useStore((s) => s.removeLink);
   const toggleLink = useStore((s) => s.toggleLink);
@@ -323,10 +336,16 @@ export function LinkEditor() {
             ({links.length})
           </span>
         </div>
-        <Button size="sm" onClick={() => addLink()}>
-          <Plus className="w-3.5 h-3.5" />
-          Add Link
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="secondary" onClick={() => addSection()}>
+            <FolderOpen className="w-3.5 h-3.5" />
+            Section
+          </Button>
+          <Button size="sm" onClick={() => addLink()}>
+            <Plus className="w-3.5 h-3.5" />
+            Add Link
+          </Button>
+        </div>
       </div>
 
       <DndContext

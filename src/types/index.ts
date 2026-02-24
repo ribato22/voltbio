@@ -11,6 +11,8 @@ export interface LinkItem {
   enabled: boolean;
   order: number;
   target: "_blank" | "_self";
+  /** 'link' = clickable URL, 'header' = section divider/group label */
+  type?: "link" | "header";
   isEmbed?: boolean;
   validFrom?: string;
   validUntil?: string;

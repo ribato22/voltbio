@@ -57,6 +57,15 @@ function generateHtml(config: ProfileConfig): string {
   // ── Build link cards HTML ──
   const linksHtml = enabledLinks
     .map((link) => {
+      // Section Header
+      if (link.type === "header") {
+        return `
+      <div style="width:100%;padding-top:1rem;padding-bottom:0.25rem">
+        <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.6;color:${theme.colors.text}">${escapeHtml(link.title)}</p>
+        <div style="margin-top:0.375rem;height:1px;width:2rem;border-radius:9999px;opacity:0.3;background:${theme.colors.accent}"></div>
+      </div>`;
+      }
+
       const safeUrl = sanitizeUrl(link.url);
       const iconKey = detectSocialIcon(link.url);
       const rel = link.target === "_blank" ? ' rel="noopener noreferrer"' : "";

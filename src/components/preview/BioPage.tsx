@@ -183,6 +183,28 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         {/* ── Links ── */}
         <div className="w-full mt-8 space-y-3">
           {enabledLinks.map((link) => {
+            // ── Section Header ──
+            if (link.type === "header") {
+              return (
+                <motion.div
+                  key={link.id}
+                  variants={linkCardVariants}
+                  className="w-full pt-4 pb-1"
+                >
+                  <p
+                    className="text-xs font-bold uppercase tracking-widest opacity-60"
+                    style={{ color: theme.colors.text }}
+                  >
+                    {link.title}
+                  </p>
+                  <div
+                    className="mt-1.5 h-px w-8 rounded-full opacity-30"
+                    style={{ background: theme.colors.accent }}
+                  />
+                </motion.div>
+              );
+            }
+
             const iconKey = detectSocialIcon(link.url);
             const safeUrl = sanitizeUrl(link.url);
             const embedInfo = link.isEmbed ? detectEmbed(link.url) : null;
