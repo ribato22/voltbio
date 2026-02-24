@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Sparkles, UserPlus } from "lucide-react";
+import { MapPin, Sparkles, UserPlus, Lock } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { trackClick } from "@/lib/analytics";
 import { SocialIcon } from "@/components/preview/SocialIcon";
 import { detectSocialIcon, sanitizeUrl, getAvatarFallback, cn } from "@/lib/utils";
 import { downloadVCard } from "@/lib/vcard";
 import { detectEmbed, getSpotifyHeight } from "@/lib/embed";
+import { decryptUrl } from "@/lib/crypto";
 
 /* ─────────────────────────────────────────────
    Stagger Animation Variants
@@ -95,13 +96,13 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         <style dangerouslySetInnerHTML={{ __html: settings.customCSS }} />
       )}
       <motion.div
-        className="w-full max-w-md mx-auto flex flex-col items-center"
+        className="profile-container w-full max-w-md mx-auto flex flex-col items-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* ── Avatar ── */}
-        <motion.div variants={avatarVariants} className="mb-4">
+        <motion.div variants={avatarVariants} className="profile-avatar mb-4">
           {profile.avatar ? (
             <motion.img
               src={profile.avatar}
@@ -133,7 +134,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         {/* ── Name ── */}
         <motion.h1
           variants={fadeUpVariants}
-          className="text-2xl font-bold text-center"
+          className="profile-name text-2xl font-bold text-center"
           style={{ color: theme.colors.text }}
         >
           {profile.name || "Your Name"}
@@ -143,7 +144,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         {profile.location && (
           <motion.p
             variants={fadeUpVariants}
-            className="flex items-center gap-1 text-sm mt-1 opacity-60"
+            className="profile-location flex items-center gap-1 text-sm mt-1 opacity-60"
           >
             <MapPin className="w-3 h-3" aria-hidden="true" />
             {profile.location}
@@ -153,7 +154,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         {/* ── Bio ── */}
         <motion.p
           variants={fadeUpVariants}
-          className="text-sm text-center mt-2 opacity-75 max-w-xs leading-relaxed"
+          className="profile-bio text-sm text-center mt-2 opacity-75 max-w-xs leading-relaxed"
           style={{ color: theme.colors.text }}
         >
           {profile.bio || "Welcome to my link page"}
@@ -170,7 +171,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                 : undefined;
               downloadVCard(profile, pageUrl);
             }}
-            className="mt-3 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
+            className="save-contact-btn mt-3 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
             style={{
               background: theme.colors.accent + "18",
               color: theme.colors.accent,
@@ -186,7 +187,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         )}
 
         {/* ── Links ── */}
-        <div className="w-full mt-8 space-y-3">
+        <div className="links-container w-full mt-8 space-y-3">
           {enabledLinks.map((link) => {
             // ── Section Header ──
             if (link.type === "header") {
@@ -194,7 +195,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                 <motion.div
                   key={link.id}
                   variants={linkCardVariants}
-                  className="w-full pt-4 pb-1"
+                  className="section-header w-full pt-4 pb-1"
                 >
                   <p
                     className="text-xs font-bold uppercase tracking-widest opacity-60"
@@ -220,7 +221,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                 <motion.div
                   key={link.id}
                   variants={linkCardVariants}
-                  className="w-full overflow-hidden rounded-xl"
+                  className="embed-card w-full overflow-hidden rounded-xl"
                   style={{
                     border: `1px solid ${theme.colors.cardBackground}`,
                   }}
@@ -255,6 +256,48 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
               );
             }
 
+            // ── Render Locked Link Button ──
+            if (link.isLocked && link.encryptedUrl) {
+              return (
+                <motion.button
+                  key={link.id}
+                  variants={linkCardVariants}
+                  type="button"
+                  onClick={async () => {
+                    const pw = window.prompt(`🔒 "${link.title}" is password-protected.\nEnter password to unlock:`);
+                    if (!pw) return;
+                    const url = await decryptUrl(link.encryptedUrl!, pw);
+                    if (url) {
+                      window.open(url, link.target);
+                    } else {
+                      window.alert("❌ Wrong password. Please try again.");
+                    }
+                  }}
+                  className="link-card link-locked group flex items-center gap-3 w-full px-5 py-3.5 text-sm font-medium transition-shadow duration-200 cursor-pointer"
+                  style={{
+                    background: isOutline ? "transparent" : theme.colors.cardBackground,
+                    color: theme.colors.text,
+                    borderRadius: buttonRadius,
+                    border: isOutline
+                      ? `1.5px solid ${theme.colors.accent}`
+                      : `1px solid ${theme.colors.cardBackground}`,
+                  }}
+                  whileHover={{
+                    scale: 1.03,
+                    y: -2,
+                    borderColor: theme.colors.accent,
+                    boxShadow: `0 8px 24px ${theme.colors.accent}25`,
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                >
+                  <Lock className="w-4 h-4 link-icon" style={{ color: theme.colors.accent }} />
+                  <span className="link-title flex-1 text-center">{link.title}</span>
+                  <span className="w-[18px]" aria-hidden="true" />
+                </motion.button>
+              );
+            }
+
             // ── Render Standard Link Button ──
             return (
               <motion.a
@@ -265,7 +308,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                 rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
                 onClick={() => trackClick(link.id)}
                 aria-label={`${link.title}${link.target === "_blank" ? " (opens in new tab)" : ""}`}
-                className="group flex items-center gap-3 w-full px-5 py-3.5 text-sm font-medium transition-shadow duration-200"
+                className="link-card group flex items-center gap-3 w-full px-5 py-3.5 text-sm font-medium transition-shadow duration-200"
                 style={{
                   background: isOutline ? "transparent" : theme.colors.cardBackground,
                   color: theme.colors.text,
@@ -286,8 +329,8 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                <SocialIcon iconKey={iconKey} size={18} />
-                <span className="flex-1 text-center">{link.title}</span>
+                <SocialIcon iconKey={iconKey} size={18} className="link-icon" />
+                <span className="link-title flex-1 text-center">{link.title}</span>
                 <span className="w-[18px]" aria-hidden="true" />
               </motion.a>
             );
@@ -307,7 +350,7 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
         {settings.showFooter && (
           <motion.footer
             variants={fadeUpVariants}
-            className="mt-12 flex items-center gap-1.5 text-xs opacity-40"
+            className="page-footer mt-12 flex items-center gap-1.5 text-xs opacity-40"
             role="contentinfo"
           >
             <Sparkles className="w-3 h-3" aria-hidden="true" />

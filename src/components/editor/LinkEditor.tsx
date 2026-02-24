@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -36,8 +36,71 @@ import {
   ExternalLink,
   Calendar,
   FolderOpen,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import type { LinkItem } from "@/types";
+import { encryptUrl } from "@/lib/crypto";
+
+/* ─────────────────────────────────────────────
+   Password Input for Link Locking
+   ───────────────────────────────────────────── */
+
+function PasswordInput({
+  linkId,
+  linkUrl,
+  hasEncrypted,
+  onUpdate,
+}: {
+  linkId: string;
+  linkUrl: string;
+  hasEncrypted: boolean;
+  onUpdate: (id: string, u: Partial<LinkItem>) => void;
+}) {
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const handleEncrypt = useCallback(async () => {
+    if (!pw || !linkUrl) return;
+    setBusy(true);
+    try {
+      const encrypted = await encryptUrl(linkUrl, pw);
+      onUpdate(linkId, { encryptedUrl: encrypted });
+      setPw("");
+    } finally {
+      setBusy(false);
+    }
+  }, [pw, linkUrl, linkId, onUpdate]);
+
+  if (hasEncrypted) {
+    return (
+      <p className="text-[10px] text-emerald-500 flex items-center gap-1">
+        <Lock className="w-3 h-3" /> Encrypted ✓ — visitors must enter password
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex gap-1.5">
+      <input
+        type="password"
+        value={pw}
+        onChange={(e) => setPw(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleEncrypt()}
+        placeholder="Set password..."
+        className="flex-1 text-xs px-2 py-1.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)]"
+      />
+      <button
+        type="button"
+        disabled={!pw || busy}
+        onClick={handleEncrypt}
+        className="px-2.5 py-1.5 rounded-lg bg-[var(--lf-accent)] text-white text-xs font-medium disabled:opacity-40 cursor-pointer"
+      >
+        {busy ? "..." : "Lock"}
+      </button>
+    </div>
+  );
+}
 
 /* ─────────────────────────────────────────────
    Sortable Link Item
@@ -269,6 +332,32 @@ function SortableLinkItem({
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* ── Password Lock ── */}
+              <div className="flex flex-col gap-2 p-2.5 rounded-lg bg-[var(--lf-accent)]/5 border border-[var(--lf-accent)]/20">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-[var(--lf-text)] flex items-center gap-1.5">
+                    {link.isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                    Password Lock
+                  </span>
+                  <Toggle
+                    checked={!!link.isLocked}
+                    onCheckedChange={async () => {
+                      if (link.isLocked) {
+                        // Unlock: clear encrypted data
+                        onUpdate(link.id, { isLocked: false, encryptedUrl: undefined });
+                      } else {
+                        // Lock: will need password input
+                        onUpdate(link.id, { isLocked: true });
+                      }
+                    }}
+                    id={`lock-${link.id}`}
+                  />
+                </div>
+                {link.isLocked && (
+                  <PasswordInput linkId={link.id} linkUrl={link.url} hasEncrypted={!!link.encryptedUrl} onUpdate={onUpdate} />
+                )}
               </div>
             </>
           )}

@@ -90,6 +90,38 @@ function generateHtml(config: ProfileConfig): string {
       </div>`;
       }
 
+      // Locked link button
+      if (link.isLocked && link.encryptedUrl) {
+        return `
+      <button type="button" class="link-card link-locked scheduled-link"${schedAttrs}
+         data-encrypted="${escapeHtml(link.encryptedUrl)}"
+         data-target="${link.target}"
+         onclick="(async function(btn){
+           var pw=prompt('🔒 &quot;${escapeHtml(link.title)}&quot; is password-protected.\\nEnter password:');
+           if(!pw)return;
+           try{
+             var combined=Uint8Array.from(atob(btn.dataset.encrypted),function(c){return c.charCodeAt(0)});
+             var salt=combined.slice(0,16),iv=combined.slice(16,28),ct=combined.slice(28);
+             var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+             var key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+             var dec=await crypto.subtle.decrypt({name:'AES-GCM',iv:iv},key,ct);
+             var url=new TextDecoder().decode(dec);
+             window.open(url,btn.dataset.target);
+           }catch(e){alert('❌ Wrong password.');}
+         })(this)"
+         style="
+           background: ${isOutline ? "transparent" : theme.colors.cardBackground};
+           color: ${theme.colors.text};
+           border-radius: ${buttonRadius};
+           border: ${isOutline ? `1.5px solid ${theme.colors.accent}` : `1px solid ${theme.colors.cardBackground}`};
+           cursor: pointer;
+         ">
+        <span class="link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        <span class="link-title">${escapeHtml(link.title)}</span>
+        <span class="link-spacer"></span>
+      </button>`;
+      }
+
       // Standard link button
       return `
       <a href="${safeUrl || "#"}" target="${link.target}"${rel}

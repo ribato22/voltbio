@@ -16,6 +16,9 @@ export interface LinkItem {
   isEmbed?: boolean;
   validFrom?: string;
   validUntil?: string;
+  /** Password-protected link fields */
+  isLocked?: boolean;
+  encryptedUrl?: string;
 }
 
 /** User profile information */

@@ -16,6 +16,8 @@ export const LinkSchema = z.object({
   type: z.enum(["link", "header"]).optional(),
   validFrom: z.string().optional(),
   validUntil: z.string().optional(),
+  isLocked: z.boolean().optional(),
+  encryptedUrl: z.string().optional(),
 });
 
 export const ProfileSchema = z.object({
