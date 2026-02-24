@@ -14,12 +14,16 @@ const qrStyles = [
   { id: "rounded", label: "Rounded" },
 ] as const;
 
+type QRStyle = (typeof qrStyles)[number]["id"];
+
 /**
  * Smart QR Code Generator
  *
- * Generates a theme-aware QR code from the user's bio page URL.
- * The internal canvas is 1024×1024 for print quality, but the
- * displayed preview is scaled down via an <img> element.
+ * - Classic: standard square modules via qrcode library
+ * - Rounded: custom Canvas renderer using the raw data matrix
+ *            with properly sized rounded-rect modules
+ * - 1024×1024 hidden canvas for print quality
+ * - Scaled <img> preview for clean UI
  */
 export function QRCodeGenerator() {
   const profile = useStore((s) => s.config.profile);
@@ -28,41 +32,34 @@ export function QRCodeGenerator() {
   const [previewSrc, setPreviewSrc] = useState<string>("");
   const [customUrl, setCustomUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeStyle, setActiveStyle] = useState<"classic" | "rounded">("rounded");
+  const [activeStyle, setActiveStyle] = useState<QRStyle>("rounded");
 
-  // Build the default URL from username
   const defaultUrl = profile.username
     ? `https://${profile.username}.github.io/voltbio`
     : "https://voltbio.app";
 
   const qrUrl = customUrl.trim() || defaultUrl;
 
-  // Generate QR code on a hidden canvas, then render preview via <img>
   const generateQR = useCallback(async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const size = 1024; // High-res for print
+    const size = 1024;
     canvas.width = size;
     canvas.height = size;
 
     try {
-      await QRCode.toCanvas(canvas, qrUrl, {
-        width: size,
-        margin: 4,
-        color: {
-          dark: theme.colors.accent,
-          light: "#00000000", // Transparent background
-        },
-        errorCorrectionLevel: "H",
-      });
-
-      // If rounded style, redraw modules as rounded rects
       if (activeStyle === "rounded") {
-        drawRoundedQR(canvas, theme.colors.accent);
+        drawRoundedQR(canvas, qrUrl, theme.colors.accent, size);
+      } else {
+        // Classic: use the library's built-in renderer
+        await QRCode.toCanvas(canvas, qrUrl, {
+          width: size,
+          margin: 4,
+          color: { dark: theme.colors.accent, light: "#00000000" },
+          errorCorrectionLevel: "H",
+        });
       }
-
-      // Convert canvas to data URL for the preview <img>
       setPreviewSrc(canvas.toDataURL("image/png"));
     } catch (err) {
       console.error("QR generation failed:", err);
@@ -73,49 +70,41 @@ export function QRCodeGenerator() {
     generateQR();
   }, [generateQR]);
 
-  // Download QR as PNG (full 1024px with white background + URL text)
+  // Download as PNG with white background + URL text
   const handleDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const padding = 80;
-    const dlCanvas = document.createElement("canvas");
-    dlCanvas.width = canvas.width + padding * 2;
-    dlCanvas.height = canvas.height + padding * 2 + 60;
+    const dl = document.createElement("canvas");
+    dl.width = canvas.width + padding * 2;
+    dl.height = canvas.height + padding * 2 + 60;
 
-    const ctx = dlCanvas.getContext("2d");
+    const ctx = dl.getContext("2d");
     if (!ctx) return;
 
-    // White background
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, dlCanvas.width, dlCanvas.height);
-
-    // Draw QR centered
+    ctx.fillRect(0, 0, dl.width, dl.height);
     ctx.drawImage(canvas, padding, padding);
 
-    // URL text below
     ctx.fillStyle = "#666666";
     ctx.font = "500 24px Inter, system-ui, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(
       qrUrl.replace(/^https?:\/\//, ""),
-      dlCanvas.width / 2,
+      dl.width / 2,
       canvas.height + padding + 45
     );
 
-    // Trigger download
-    const link = document.createElement("a");
-    link.download = `${profile.username || "voltbio"}-qrcode.png`;
-    link.href = dlCanvas.toDataURL("image/png");
-    link.click();
+    const a = document.createElement("a");
+    a.download = `${profile.username || "voltbio"}-qrcode.png`;
+    a.href = dl.toDataURL("image/png");
+    a.click();
   };
 
-  // Copy URL to clipboard
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(qrUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
       const ta = document.createElement("textarea");
       ta.value = qrUrl;
@@ -123,9 +112,9 @@ export function QRCodeGenerator() {
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -135,10 +124,10 @@ export function QRCodeGenerator() {
         <h3 className="text-sm font-semibold text-[var(--lf-text)]">QR Code</h3>
       </div>
 
-      {/* Hidden canvas for full-res generation */}
+      {/* Hidden hi-res canvas */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Scaled-down preview */}
+      {/* Scaled preview */}
       <div className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-white border border-[var(--lf-border)]">
         {previewSrc ? (
           <img
@@ -155,7 +144,6 @@ export function QRCodeGenerator() {
         </p>
       </div>
 
-      {/* Custom URL Override */}
       <Input
         label="Custom URL (optional)"
         value={customUrl}
@@ -173,7 +161,7 @@ export function QRCodeGenerator() {
             <button
               key={style.id}
               type="button"
-              onClick={() => setActiveStyle(style.id as "classic" | "rounded")}
+              onClick={() => setActiveStyle(style.id)}
               className={cn(
                 "flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
                 activeStyle === style.id
@@ -210,55 +198,53 @@ export function QRCodeGenerator() {
   );
 }
 
-/* ─────────────────────────────────────────────
-   Rounded QR — redraws modules as rounded rects
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   Rounded QR Renderer
+   
+   Uses QRCode.create() to get the raw boolean matrix, then
+   draws each module as a properly-sized rounded rectangle.
+   This guarantees correct spacing between modules.
+   ───────────────────────────────────────────────────────────── */
 
-function drawRoundedQR(canvas: HTMLCanvasElement, color: string) {
+function drawRoundedQR(
+  canvas: HTMLCanvasElement,
+  text: string,
+  color: string,
+  size: number
+) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
+  // Generate raw QR data matrix
+  const qr = QRCode.create(text, { errorCorrectionLevel: "H" });
+  const modules = qr.modules;
+  const moduleCount = modules.size; // e.g. 33 for version 4
+  const data = modules.data; // Uint8Array: 1 = dark, 0 = light
 
-  // Detect module size by scanning for first non-transparent pixel
-  let moduleSize = 0;
-  let startX = 0;
-  let startY = 0;
+  // Calculate dimensions
+  const quietZone = 4; // modules of padding
+  const totalModules = moduleCount + quietZone * 2;
+  const moduleSize = size / totalModules;
 
-  outer: for (let y = 0; y < canvas.height; y++) {
-    for (let x = 0; x < canvas.width; x++) {
-      const idx = (y * canvas.width + x) * 4;
-      if (pixels[idx + 3] > 128) {
-        startX = x;
-        startY = y;
-        let w = 0;
-        while (x + w < canvas.width) {
-          const ci = (y * canvas.width + (x + w)) * 4;
-          if (pixels[ci + 3] > 128) w++;
-          else break;
-        }
-        moduleSize = w;
-        break outer;
-      }
-    }
-  }
+  // Clear canvas (transparent)
+  ctx.clearRect(0, 0, size, size);
 
-  if (moduleSize === 0) return;
-
-  // Clear and redraw as rounded rectangles
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw each dark module as a rounded rect
   ctx.fillStyle = color;
-  const radius = moduleSize * 0.35;
 
-  for (let y = startY; y < canvas.height; y += moduleSize) {
-    for (let x = startX; x < canvas.width; x += moduleSize) {
-      const centerIdx =
-        ((y + Math.floor(moduleSize / 2)) * canvas.width +
-          (x + Math.floor(moduleSize / 2))) *
-        4;
-      if (centerIdx < pixels.length && pixels[centerIdx + 3] > 128) {
-        roundRect(ctx, x, y, moduleSize, moduleSize, radius);
+  // Gap between modules for visual separation (10% of module size)
+  const gap = moduleSize * 0.1;
+  const dotSize = moduleSize - gap;
+  const radius = dotSize * 0.3; // 30% corner radius — subtle rounding
+  const offset = gap / 2;
+
+  for (let row = 0; row < moduleCount; row++) {
+    for (let col = 0; col < moduleCount; col++) {
+      const idx = row * moduleCount + col;
+      if (data[idx]) {
+        const x = (col + quietZone) * moduleSize + offset;
+        const y = (row + quietZone) * moduleSize + offset;
+        roundRect(ctx, x, y, dotSize, dotSize, radius);
       }
     }
   }

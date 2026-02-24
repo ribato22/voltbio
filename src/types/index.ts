@@ -39,6 +39,7 @@ export interface ThemeConfig {
   font: string;
   buttonStyle: "rounded" | "pill" | "square" | "outline";
   animation: "none" | "fade-up" | "slide-in" | "scale";
+  backgroundPattern: "none" | "dots" | "grid" | "gradient" | "noise";
 }
 
 /** SEO configuration */

@@ -7,6 +7,7 @@ import { saveAs } from "file-saver";
 import type { ProfileConfig } from "@/types";
 import { sanitizeUrl, detectSocialIcon, getAvatarFallback } from "@/lib/utils";
 import { buildGoogleFontsUrl, getFontFallback } from "@/lib/fonts";
+import { getPattern, gradientKeyframes } from "@/lib/patterns";
 
 /**
  * Generates a self-contained static HTML page from the user's config
@@ -129,7 +130,8 @@ function generateHtml(config: ProfileConfig): string {
 
     body {
       font-family: ${getFontFallback(theme.font || "Inter")};
-      background: ${theme.colors.background};
+      background: ${getPattern(theme.backgroundPattern || "none").getCSS(theme.colors.background, theme.colors.accent)};
+      ${getPattern(theme.backgroundPattern || "none").getExtra(theme.colors.background, theme.colors.accent)}
       color: ${theme.colors.text};
       min-height: 100vh;
       display: flex;
@@ -138,6 +140,8 @@ function generateHtml(config: ProfileConfig): string {
       padding: 3rem 1rem;
       -webkit-font-smoothing: antialiased;
     }
+
+    ${theme.backgroundPattern === "gradient" ? gradientKeyframes : ""}
 
     .container {
       width: 100%;

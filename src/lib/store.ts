@@ -37,6 +37,7 @@ const defaultConfig: ProfileConfig = {
     font: "Inter",
     buttonStyle: "rounded",
     animation: "fade-up",
+    backgroundPattern: "none",
   },
   seo: {
     title: "My Links",

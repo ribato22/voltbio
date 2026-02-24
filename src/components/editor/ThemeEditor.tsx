@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { themePresets } from "@/lib/themes";
 import { fontCatalog, loadGoogleFont } from "@/lib/fonts";
+import { backgroundPatterns } from "@/lib/patterns";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Palette, Sun, Moon, Monitor, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -193,6 +194,36 @@ export function ThemeEditor() {
               setTheme({ colors: { ...theme.colors, linkHover: c } })
             }
           />
+        </div>
+      </div>
+
+      {/* ── Background Pattern ── */}
+      <div>
+        <p className="text-xs font-medium text-[var(--lf-muted)] mb-2 uppercase tracking-wider">
+          Background
+        </p>
+        <div className="grid grid-cols-5 gap-1.5">
+          {backgroundPatterns.map((pattern) => (
+            <button
+              key={pattern.id}
+              type="button"
+              onClick={() => setTheme({ backgroundPattern: pattern.id })}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2.5 px-1.5 rounded-lg text-center transition-all duration-200 cursor-pointer",
+                "border",
+                (theme.backgroundPattern || "none") === pattern.id
+                  ? "border-[var(--lf-accent)] bg-[var(--lf-accent)]/10 shadow-sm"
+                  : "border-[var(--lf-border)] hover:border-[var(--lf-accent)]/40 bg-[var(--lf-card-bg)]"
+              )}
+              aria-pressed={(theme.backgroundPattern || "none") === pattern.id}
+              aria-label={`Select ${pattern.label} background`}
+            >
+              <span className="text-base leading-none">{pattern.emoji}</span>
+              <span className="text-[10px] font-medium text-[var(--lf-text)] leading-tight">
+                {pattern.label}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

@@ -37,6 +37,7 @@ export const ThemeSchema = z.object({
   font: z.string().default("Inter"),
   buttonStyle: z.enum(["rounded", "pill", "square", "outline"]).default("rounded"),
   animation: z.enum(["none", "fade-up", "slide-in", "scale"]).default("fade-up"),
+  backgroundPattern: z.enum(["none", "dots", "grid", "gradient", "noise"]).default("none"),
 });
 
 export const SeoSchema = z.object({
