@@ -133,6 +133,10 @@ export interface AppSettings {
   locale: "en" | "id";
   /** Power-user custom CSS, scoped to #voltbio-page */
   customCSS?: string;
+  /** PWA Install & Offline support */
+  pwaEnabled?: boolean;
+  /** Short name shown below home screen icon (max 12 chars) */
+  pwaShortName?: string;
 }
 
 /** Floating Action Button config */

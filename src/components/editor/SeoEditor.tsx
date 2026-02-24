@@ -4,7 +4,7 @@ import { useStore } from "@/lib/store";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Toggle } from "@/components/ui/Toggle";
-import { Search, Settings2, MessageCircle, Twitter, Globe } from "lucide-react";
+import { Search, Settings2, MessageCircle, Twitter, Globe, Smartphone } from "lucide-react";
 
 /* ── Live Social Preview Cards ── */
 function WhatsAppPreview({ title, description, url }: { title: string; description: string; url: string }) {
@@ -274,6 +274,35 @@ export function SeoEditor() {
                 onChange={(e) => updateFab({ label: e.target.value })}
                 placeholder="Chat with us!"
               />
+            </div>
+          )}
+        </div>
+
+        {/* ── PWA Install & Offline ── */}
+        <div className="space-y-3 p-3.5 rounded-xl bg-[var(--lf-bg)] border border-[var(--lf-border)]">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[var(--lf-text)] flex items-center gap-1.5">
+              <Smartphone className="w-3.5 h-3.5" />
+              App Install (PWA)
+            </p>
+            <Toggle
+              checked={!!settings.pwaEnabled}
+              onCheckedChange={(v) => updateSettings({ pwaEnabled: v })}
+              id="pwa-toggle"
+            />
+          </div>
+
+          {settings.pwaEnabled && (
+            <div className="space-y-2 pt-1">
+              <Input
+                label="App Short Name (max 12 chars)"
+                value={settings.pwaShortName || ""}
+                onChange={(e) => updateSettings({ pwaShortName: e.target.value.slice(0, 12) })}
+                placeholder={profile.name?.slice(0, 12) || "VoltBio"}
+              />
+              <p className="text-[10px] text-[var(--lf-muted)]">
+                Exported site can be installed as an app on mobile devices. Works offline!
+              </p>
             </div>
           )}
         </div>
