@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { themePresets } from "@/lib/themes";
+import { fontCatalog, loadGoogleFont } from "@/lib/fonts";
 import { ColorPicker } from "@/components/ui/ColorPicker";
-import { Palette, Sun, Moon, Monitor } from "lucide-react";
+import { Palette, Sun, Moon, Monitor, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ThemeConfig } from "@/types";
 
@@ -30,6 +32,11 @@ const animations: { value: ThemeConfig["animation"]; label: string }[] = [
 export function ThemeEditor() {
   const theme = useStore((s) => s.config.theme);
   const setTheme = useStore((s) => s.setTheme);
+
+  // Pre-load all fonts so their names render in their own typeface
+  useEffect(() => {
+    fontCatalog.forEach((f) => loadGoogleFont(f.family));
+  }, []);
   const applyPreset = useStore((s) => s.applyPreset);
 
   return (
@@ -102,6 +109,44 @@ export function ThemeEditor() {
                   />
                 ))}
               </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Font Selector ── */}
+      <div>
+        <div className="flex items-center gap-1.5 mb-2">
+          <Type className="w-3.5 h-3.5 text-[var(--lf-muted)]" />
+          <p className="text-xs font-medium text-[var(--lf-muted)] uppercase tracking-wider">
+            Font
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {fontCatalog.map((font) => (
+            <button
+              key={font.family}
+              type="button"
+              onClick={() => setTheme({ font: font.family })}
+              className={cn(
+                "relative py-2.5 px-3 rounded-lg text-left transition-all duration-200 cursor-pointer",
+                "border",
+                theme.font === font.family
+                  ? "border-[var(--lf-accent)] bg-[var(--lf-accent)]/10 shadow-sm"
+                  : "border-[var(--lf-border)] hover:border-[var(--lf-accent)]/40 bg-[var(--lf-card-bg)]"
+              )}
+              aria-pressed={theme.font === font.family}
+              aria-label={`Select ${font.label} font`}
+            >
+              <span
+                className="block text-sm font-medium text-[var(--lf-text)] truncate"
+                style={{ fontFamily: `'${font.family}', sans-serif` }}
+              >
+                {font.label}
+              </span>
+              <span className="block text-[10px] text-[var(--lf-muted)] mt-0.5 capitalize">
+                {font.category}
+              </span>
             </button>
           ))}
         </div>

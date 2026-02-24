@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
+import { loadGoogleFont, getFontFallback } from "@/lib/fonts";
 import type { ThemeColors } from "@/types";
 
 /**
@@ -18,17 +19,17 @@ const CSS_VAR_MAP: Record<keyof ThemeColors, string> = {
 /**
  * Hook: syncs Zustand theme state → CSS custom properties in real-time.
  *
- * Every time `config.theme.colors` or `config.theme.mode` changes in the
- * store, the corresponding `--lf-*` CSS variables on `document.documentElement`
- * are updated. Also applies/removes `data-theme` attribute for dark/light mode.
+ * Every time `config.theme.colors`, `config.theme.mode`, or `config.theme.font`
+ * changes in the store, the corresponding CSS variables on
+ * `document.documentElement` are updated.
  *
- * This is the bridge between the reactive state (Zustand) and the
- * imperative DOM styling (CSS custom properties).
+ * Also dynamically loads Google Fonts and sets `--lf-font` + body font-family.
  */
 export function useThemeBridge() {
   const theme = useStore((s) => s.config.theme);
   const prevColorsRef = useRef<ThemeColors | null>(null);
   const prevModeRef = useRef<string | null>(null);
+  const prevFontRef = useRef<string | null>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -56,6 +57,19 @@ export function useThemeBridge() {
         }
       }
       prevColorsRef.current = colors;
+    }
+
+    // ── Apply font ──
+    if (theme.font && theme.font !== prevFontRef.current) {
+      // Dynamically load the Google Font
+      loadGoogleFont(theme.font);
+
+      // Set CSS custom property + body font
+      const fontStack = getFontFallback(theme.font);
+      root.style.setProperty("--lf-font", fontStack);
+      document.body.style.fontFamily = fontStack;
+
+      prevFontRef.current = theme.font;
     }
   }, [theme]);
 

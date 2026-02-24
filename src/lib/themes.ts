@@ -30,7 +30,7 @@ export const themePresets: ThemePreset[] = [
       accent: "#a78bfa",
       linkHover: "#c4b5fd",
     },
-    font: "Inter",
+    font: "Poppins",
     buttonStyle: "rounded",
   },
   {
@@ -44,7 +44,7 @@ export const themePresets: ThemePreset[] = [
       accent: "#38bdf8",
       linkHover: "#7dd3fc",
     },
-    font: "Inter",
+    font: "Space Grotesk",
     buttonStyle: "pill",
   },
   {
@@ -58,7 +58,7 @@ export const themePresets: ThemePreset[] = [
       accent: "#34d399",
       linkHover: "#6ee7b7",
     },
-    font: "Inter",
+    font: "DM Sans",
     buttonStyle: "rounded",
   },
   {
@@ -72,7 +72,7 @@ export const themePresets: ThemePreset[] = [
       accent: "#f97316",
       linkHover: "#fb923c",
     },
-    font: "Inter",
+    font: "Outfit",
     buttonStyle: "pill",
   },
   {
@@ -86,7 +86,7 @@ export const themePresets: ThemePreset[] = [
       accent: "#e879f9",
       linkHover: "#f0abfc",
     },
-    font: "Inter",
+    font: "Space Grotesk",
     buttonStyle: "outline",
   },
   {
@@ -100,7 +100,7 @@ export const themePresets: ThemePreset[] = [
       accent: "#171717",
       linkHover: "#404040",
     },
-    font: "Inter",
+    font: "Lora",
     buttonStyle: "square",
   },
 ];

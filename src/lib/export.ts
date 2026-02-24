@@ -6,6 +6,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import type { ProfileConfig } from "@/types";
 import { sanitizeUrl, detectSocialIcon, getAvatarFallback } from "@/lib/utils";
+import { buildGoogleFontsUrl, getFontFallback } from "@/lib/fonts";
 
 /**
  * Generates a self-contained static HTML page from the user's config
@@ -119,7 +120,7 @@ function generateHtml(config: ProfileConfig): string {
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=${theme.font || "Inter"}:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="${buildGoogleFontsUrl(theme.font || "Inter")}" rel="stylesheet" />
 
   ${analyticsHtml}
 
@@ -127,7 +128,7 @@ function generateHtml(config: ProfileConfig): string {
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: '${theme.font || "Inter"}', system-ui, -apple-system, sans-serif;
+      font-family: ${getFontFallback(theme.font || "Inter")};
       background: ${theme.colors.background};
       color: ${theme.colors.text};
       min-height: 100vh;
