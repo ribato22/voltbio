@@ -58,6 +58,7 @@ export const SettingsSchema = z.object({
   footerText: z.string().default("Powered by VoltBio"),
   analyticsId: z.string().optional(),
   locale: z.enum(["en", "id"]).default("en"),
+  customCSS: z.string().max(5000).optional(),
 });
 
 export const ProfileConfigSchema = z.object({

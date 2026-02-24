@@ -63,6 +63,8 @@ export interface AppSettings {
   footerText: string;
   analyticsId?: string;
   locale: "en" | "id";
+  /** Power-user custom CSS, scoped to #voltbio-page */
+  customCSS?: string;
 }
 
 /** Complete profile configuration (top-level JSON structure) */

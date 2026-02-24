@@ -83,12 +83,17 @@ export function BioPage({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <div
+      id="voltbio-page"
       className={cn(
         "flex flex-col items-center min-h-full w-full",
         embedded ? "py-8 px-4" : "min-h-screen py-16 px-4"
       )}
       style={{ background: theme.colors.background, color: theme.colors.text }}
     >
+      {/* Custom CSS injection (scoped to #voltbio-page) */}
+      {settings.customCSS && (
+        <style dangerouslySetInnerHTML={{ __html: settings.customCSS }} />
+      )}
       <motion.div
         className="w-full max-w-md mx-auto flex flex-col items-center"
         variants={containerVariants}

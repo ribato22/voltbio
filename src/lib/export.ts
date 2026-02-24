@@ -312,9 +312,10 @@ function generateHtml(config: ProfileConfig): string {
       opacity: 0.4;
     }
   </style>
+  ${settings.customCSS ? `<style>/* Custom CSS */\n${settings.customCSS}</style>` : ""}
 </head>
 <body>
-  <main class="container">
+  <main id="voltbio-page" class="container">
     ${avatarHtml}
     <h1 class="name">${escapeHtml(profile.name || "Your Name")}</h1>
     ${locationHtml}

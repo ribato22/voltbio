@@ -32,7 +32,9 @@ const animations: { value: ThemeConfig["animation"]; label: string }[] = [
 
 export function ThemeEditor() {
   const theme = useStore((s) => s.config.theme);
+  const settings = useStore((s) => s.config.settings);
   const setTheme = useStore((s) => s.setTheme);
+  const updateSettings = useStore((s) => s.updateSettings);
 
   // Pre-load all fonts so their names render in their own typeface
   useEffect(() => {
@@ -274,6 +276,31 @@ export function ThemeEditor() {
               {opt.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* ── Custom CSS (Advanced) ── */}
+      <div className="pt-2 border-t border-[var(--lf-border)]">
+        <p className="text-xs font-medium text-[var(--lf-muted)] mb-2 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="text-[10px]">⚡</span>
+          Custom CSS
+        </p>
+        <textarea
+          value={settings.customCSS || ""}
+          onChange={(e) => updateSettings({ customCSS: e.target.value })}
+          placeholder={`#voltbio-page .link-card {\n  border-radius: 0;\n  box-shadow: 0 2px 8px rgba(0,0,0,.15);\n}`}
+          rows={6}
+          maxLength={5000}
+          spellCheck={false}
+          className="w-full text-xs px-3 py-2.5 rounded-lg bg-[var(--lf-bg)] border border-[var(--lf-border)] text-[var(--lf-text)] font-mono leading-relaxed resize-y focus:outline-none focus:ring-1 focus:ring-[var(--lf-accent)] placeholder:text-[var(--lf-muted)]/40"
+        />
+        <div className="flex items-center justify-between mt-1.5">
+          <p className="text-[10px] text-[var(--lf-muted)] leading-snug">
+            Scope with <code className="px-1 py-0.5 rounded bg-[var(--lf-border)] text-[var(--lf-accent)] font-mono text-[9px]">#voltbio-page</code> to avoid UI conflicts
+          </p>
+          <span className="text-[10px] text-[var(--lf-muted)] tabular-nums">
+            {(settings.customCSS || "").length}/5000
+          </span>
         </div>
       </div>
     </div>
